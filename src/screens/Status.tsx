@@ -17,19 +17,30 @@ const UpdateData = [
 export default function Status() {
     const navigation = useNavigation();
     const route = useRoute<any>();
-    const [myStatus, setMyStatus] = useState([])
+    const [myStatus, setMyStatus] = useState([]);
+    const [recentUpdates, setRecentUpdates] = useState(UpdateData)
 
     useEffect(() => {
         fetchMyStatus();
     }, []);
+
+    useEffect(() => {
+        const newStatuses = route.params?.newStstuses;
+
+        if(newStatuses?.length) {
+            setMyStatus( prev => [ ...newStatuses, 
+ ...prev
+            ])
+        }
+    }, [route.params?.newStatuses])
 
     const fetchMyStatus = async () => {
         try {
 const res = await  fetch("http://10.0.2.2:3000/status");
 const data = await res.json();
 
-if(data.success) {
-    setMyStatus(data.statuses)
+if(data.success && data.statuses?.length) {
+    setMyStatus(prev => [...data.statuses, ...prev]);
 }
         }catch(err) {
 console.log("Sorry failed to fetch status from the backend", err)
@@ -37,20 +48,21 @@ console.log("Sorry failed to fetch status from the backend", err)
     }
     const renderItem = ({item}: any) => (
         <TouchableOpacity 
-        onPress={() =>navigation.navigate("StatusView", {
-            avatar: item.avatar,
-            username: item.username
-        })}
+       onPress={() => {
+        if(myStatus.length > 0) {
+            navigation.navigate("StatusView", {
+                avatar: myStatus[0].mediaUrl,
+                username: "My Status"
+            })
+        }
+       }}
         
         style={styles.statusItem}>
         <View style={[
             styles.avatarPort,
             {borderColor: item.hasNew ? "rgba(10, 157, 241, 1)": "#ccc"}
         ]}>
-        <Image source={{uri: myStatus.length > 0
-        ? myStatus[0].mediaUrl
-        :  "https://drive.google.com/uc?export=view&id=19XRQ062YGtJbptSiwgNXz4uuTARJBe-s",
-
+        <Image source={{uri: item.avatar
         }} 
          style={styles.avatar} />
         </View>
@@ -82,7 +94,7 @@ console.log("Sorry failed to fetch status from the backend", err)
 <View style={styles.statusRow}>
 <View style={styles.avatarWrap} >
 <TouchableOpacity onPress={() => {
-    if(myStatus.length > 0 ) {
+    if(myStatus) {
         navigation.navigate("StatusView", {
             avatar: myStatus[0].mediaUrl,
             username: "MyStatus",
@@ -97,10 +109,14 @@ console.log("Sorry failed to fetch status from the backend", err)
         },
     ]}>
 
-        <Image source={{uri: myStatus.length > 0
-            ? myStatus[0]
-            :  "https://drive.google.com/uc?export=view&id=19XRQ062YGtJbptSiwgNXz4uuTARJBe-s",  
-        }} style={styles.avatar} />
+ <Image
+  source={{
+    uri: myStatus.length > 0 && myStatus[0]?.mediaUrl
+      ? myStatus[0].mediaUrl
+      : "https://drive.google.com/uc?export=view&id=19XRQ062YGtJbptSiwgNXz4uuTARJBe-s"
+  }}
+  style={styles.avatar}
+/>
     </View>
     </TouchableOpacity>
 

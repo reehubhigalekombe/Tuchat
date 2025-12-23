@@ -14,7 +14,7 @@ export default function BuildStatus() {
             );
             return granted === PermissionsAndroid.RESULTS.GRANTED
         }
-        return true
+        return true;
     }
     const openCamera = async () => {
         const hasPermission = await requestCameraPermission();
@@ -24,18 +24,27 @@ export default function BuildStatus() {
             quality: 1
         });
         if(!result.didCancel && result.assets?.length) {
-            navigation.navigate("Edit", {medias: [result.assets[0]]})
+            navigation.navigate("Edit", {medias: [result.assets]})
         }
     };
 
     const openGallery = async () =>{
+        if(Platform.OS === "android") {
+            const permission = 
+            Platform.Version >=33
+            ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+            : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+            const granted = await PermissionsAndroid.request(permission);
+            if(granted !== PermissionsAndroid.RESULTS.GRANTED) return
+        }
         const result = await launchImageLibrary({
             mediaType: "photo",
             selectionLimit: 0,
         });
 
         if(!result.didCancel && result.assets?.length) {
-            navigation.navigate("Edit",  {medias: [result.assets[0]]})
+            navigation.navigate("Edit",  {medias: result.assets})
         }
     };
     return( 
