@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View,  Text, StyleSheet, TouchableOpacity, Image, FlatList, Platform, KeyboardAvoidingView, Alert,
-    Share, Linking
-
-} from "react-native";
+import { View,  Text, StyleSheet, TouchableOpacity, Image, FlatList, Platform, KeyboardAvoidingView, Alert,Share, Linking} from "react-native";
 import ImageViewing from"react-native-image-viewing";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import EmptyChat from "../component/EmptyChat";import Emoji from "../component/Emoji";
 import axios  from "axios";
@@ -15,24 +11,14 @@ import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
 export default function Chats() {
 
-    type Message = {
-    id: string;
-    text: string;
-    sender?: string,
-    timeStamp: string,
-    type? : "text" | "image" | "video" | "file";
-    file?: any
+    type Message = { id: string; text: string;
+    sender?: string, timeStamp: string, type? : "text" | "image" | "video" | "file";  file?: any
 };
 
 type RouteParams ={
     user: {
-        id: string,
-        name: string,
-        avatar: string,
-        online: boolean,
-        lastMessage? :string,
-        message? : Message[],
-        timeStamp? : string
+        id: string, name: string, avatar: string,  online: boolean,
+        lastMessage? :string, message? : Message[], timeStamp? : string
     };
 };
 
@@ -40,7 +26,6 @@ type RouteParams ={
     const navigation = useNavigation()
     const user  = (route.params as RouteParams | undefined )?.user;
 
-    
     const [messages, setMessages] = useState<Message[]>([]);
     useEffect(() => {
         if(user?.message) {
@@ -50,24 +35,16 @@ type RouteParams ={
     const[isOnline, setIsOnline] = useState(true)
     const[input, setInput] = useState("")
     const[showEmoji, setShowEmoji] = useState(false);
-
     const [isImageViewVisible, setIsImageViewVisible] = useState(false);
     const[currentImageIndex, setCurrentImageIndex] = useState(0);
     const [imagesForViewing, setImagesForViewing] = useState<any[]>([]);
-
     const [isPDFViewerVisible, setIsPDFViewerVisible] = useState(false);
     const [currentPDFUrl, setCurrentPDFUrl] = useState("");
     const[currentFileName, setCurrentFileName] = useState("")
-
     const ws = useRef<WebSocket | null>(null);
     const BASE_URL = "http://10.0.2.2:5002";
     const WS_URL = "ws://10.0.2.2:5002";
-
-
-    if(!user) {
-        return <ChatList/>
-    }
-
+    
         const handleImagePress = (imageUri: string) => {
         const allImages = messages
         .filter(msg => msg.type === "image" && msg.file)
@@ -78,10 +55,8 @@ type RouteParams ={
             setImagesForViewing(allImages);
             setCurrentImageIndex(imageIndex);
             setIsImageViewVisible(true)
-        }
-    };
+        }};
 
-    
     const handleVideoPress = async (file: any) => {
         try {
             const supported = await Linking.canOpenURL(file.uri);
@@ -93,15 +68,13 @@ type RouteParams ={
                 [{
                     text: "Cancel", style: "cancel"},
                     {text: "Share", onPress: () => shareFile(file)}
-                ]
-                ); 
+                ] ); 
             }
 
         }catch(error) {
             console.log("Error while playing Video:", error);
             Alert.alert("Error", "Video could not be played")
-    }
-}
+    }}
 
  const handleDocumentPress = async(file: any) => {
                     const fileExtension = file.name?.split(".").pop()?.toLowerCase() || "";
@@ -111,7 +84,6 @@ type RouteParams ={
                         setIsPDFViewerVisible(true);
                           return;
                     };
-                  
                     try {
                         const supported = await Linking.canOpenURL(file.uri);
                         if (supported) {
@@ -128,14 +100,11 @@ type RouteParams ={
                                     {text: "File Info", onPress: () => showFileInfo(file)},
                                     {text: "Download", onPress: () => downloadFile(file)}
                                 ]
-                            );
-                        }
+                            ); }
                     }catch(error) {
                         console.error("Error occured on opening Document:", error);
                         Alert.alert("Error", "Document could not be Opened")
-                    }
-                };
-            
+                    } };
                 const shareFile = async (file: any) => {
                     try {
                         await Share.share({
@@ -146,16 +115,13 @@ type RouteParams ={
                     }catch(error) {
                         console.error("Error occured while sharing file:", error);
                         Alert.alert( "Error", "Could not share the file")
-                    }
-                };
+                    }};
 
-                
                 const showFileInfo = (file: any) => {
                     const fileSize = file.size ?  `Size ${(file.size / 1024 / 1024).toFixed
                         (2)
                     }MB` : "Size Unknown";
                     const fileType = file.type ? `Type: ${file.type}` : "Type Unknown";
-
                     Alert.alert(
                         "File Information",
                         `Name: ${file.name}\n${fileType}\n${fileSize}\n\nTo open this file, you will need a compatible
@@ -164,7 +130,6 @@ type RouteParams ={
                     );
                 };
 
-                
                 const downloadFile = async(file: any) => {
                     Alert.alert(
                         "Download File",
@@ -173,12 +138,8 @@ type RouteParams ={
                             {text: "Cancel", style: "cancel"},
                             {text: "OK", onPress: () => {
                                 Alert.alert("Download", "download function to be implimented here higal")
-                            }}
-                        ]
-                    )
-                };
+                            }}] ) };
 
-                
                 const getFileIcon = (file: any) => {
                     const fileName = file.name?.toLowerCase() || "";
                     const fileType = file.type || "";
@@ -227,8 +188,7 @@ type RouteParams ={
         }))
         Alert.alert("Success", `${file.name} sent successfully`)
         };
-
-        
+ 
  useEffect(() => {
     const fetchMessages = async () => {
         try{
@@ -243,13 +203,11 @@ type RouteParams ={
                 type: "text"
             }));
             setMessages(formartted)
-
         }catch(err) {
             console.error("Error found while retriveing the messages:",err)
         }
     };
                fetchMessages();
-
                ws.current = new WebSocket(WS_URL);
 ws.current.onopen = () => {
   console.log("WebSocket connected successfully");
@@ -293,7 +251,6 @@ ws.current.onmessage = (event) => {
     console.error("WebSocket message parse error:", err);
   }
 };
-
                ws.current.onerror = (err) =>
                 console.error("WebSocket error", err);
                ws.current.onclose = () =>
@@ -301,7 +258,6 @@ ws.current.onmessage = (event) => {
                return () =>{
                 ws.current?.close()
                }
-
  }, [user?.name])
 
  const handleSend = (msg: string) => {
@@ -314,9 +270,7 @@ const newMessage: Message = {
     timeStamp: new Date().toISOString(),
     type: "text"
 };
-
 setMessages((prev) => [ newMessage, ...prev]);
-
 ws.current?.send(JSON.stringify({message: msg, sender: "me"}))
 setInput("")
     };
@@ -415,15 +369,14 @@ keyboardVerticalOffset={90}
        </TouchableOpacity>
         <View style={styles.status}>
             <Text style={styles.senderName}>{user.name}</Text>
+
+
         <Text style={isOnline  ? styles.online :  styles.offline}>
             {isOnline? "online" : "offline"}
         </Text>
         </View>
     </View>
-
     <View style={{flex: 1}}>
-  
-
   <View style={styles.messagePorts}>
     {messages.length === 0 ? (
         <EmptyChat/>
@@ -432,7 +385,6 @@ keyboardVerticalOffset={90}
         data={messages} 
         keyExtractor={(item) =>item.id}
         renderItem={renderMessage}
-        
         inverted
         />
    )}
@@ -474,14 +426,11 @@ doubleTapToZoomEnabled={true}
 <Icon name="close" size={26} color="white" />
 </TouchableOpacity>
 </View>
-
     </View>
 )}
 </SafeAreaView>
     )
 }
-
-
 const  styles = StyleSheet.create({
     container: {
         flex: 1,  width: "100%",
@@ -515,30 +464,16 @@ position: "absolute", top: 10, right: 10, padding: 5, borderRadius: 12, backgrou
 position: "absolute",  padding: 5, borderRadius: 20, backgroundColor: '#000' 
     },
 messagePorts: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: "transparent",
-    
+    flex: 1, padding: 12,backgroundColor: "transparent",
 },
 messageBubble: {
-    alignSelf: "flex-start",
-    maxWidth: "70%",
-    padding: 10, borderRadius: 20,
-    marginVertical: 5,
+    alignSelf: "flex-start",  maxWidth: "70%", padding: 10, borderRadius: 20, marginVertical: 5,
 }, 
 myMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#3fed3fff",
-    borderRadius: 20
+    alignSelf: "flex-end", backgroundColor: "#3fed3fff", borderRadius: 20
 },
-
 header: {
-flexDirection: "row",
-alignItems: "center",
-backgroundColor: "#171616ff",
-borderColor: "white",
-borderBottomWidth: 0.1,
-padding: 12,
+flexDirection: "row", alignItems: "center", backgroundColor: "#171616ff", borderColor: "white", borderBottomWidth: 0.1, padding: 12,
 },
 status: {
     flex: 1,
@@ -564,18 +499,13 @@ wallpaper: {
 theirMessage: {
 alignSelf: "flex-start", backgroundColor: "#ffffff", borderRadius: 20,
 },
-messageText: {
-fontSize: 18,
-textAlign: "justify",
+messageText: { fontSize: 18, textAlign: "justify",
 },
     chatItem: {
         flexDirection: "row",backgroundColor: "white", borderBottomWidth: 0.5,    paddingVertical: 11, paddingHorizontal: 15,
     },
     avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 12,
+        width: 50,  height: 50, borderRadius: 25,   marginRight: 12,
     },
     chattingPot: {
         flex: 1

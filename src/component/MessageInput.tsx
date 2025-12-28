@@ -148,7 +148,7 @@ blurOnSubmit={false}
 onSubmitEditing={handleSend}
 onChangeText={setInput}
 placeholder="Send Message"
-placeholderTextColor="#888"
+placeholderTextColor="#000"
 multiline
 />
 {

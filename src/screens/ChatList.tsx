@@ -236,7 +236,7 @@ export default function ChatList() {
 <Text style={styles.navText}>Groups</Text>
 </TouchableOpacity>
 </View>
-
+ 
 <View style={styles.bots}>
 <TouchableOpacity onPress={() => navigation.navigate("Trends" as never) } style={styles.botItem}>
 <Text style={styles.navText}>Trends</Text>

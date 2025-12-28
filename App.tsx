@@ -17,6 +17,7 @@ import OwnerProfile from "./src/screens/OwnerProfile";
 import StatusView from "./src/screens/StatusView";
 import Edit from "./src/screens/Edit";
 import BuildStatus from "./src/screens/BuildStatus";
+import Link from "./src/screens/Link";
 
 
 const Stack = createStackNavigator()
@@ -43,6 +44,7 @@ export default function() {
                                      <Stack.Screen name="OwnerProfile" component={OwnerProfile}  /> 
                                <Stack.Screen  name="BuildStatus" component={BuildStatus} />
              <Stack.Screen  name="Edit" component={Edit} />
+             <Stack.Screen name="Link"  component={Link}   />
    </Stack.Navigator>
     </NavigationContainer>
   )

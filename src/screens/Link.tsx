@@ -51,9 +51,9 @@ export default function Link() {
         <View style={styles.port}>
    <View style={styles.head}>
   <TouchableOpacity onPress={() => navigation.goBack()}>
-      <Icon name="chevron-back" size={24}color="green" />
+      <Icon name="chevron-back" size={25}color="white" />
   </TouchableOpacity>
-  <Text style={{color: "white", marginLeft: 20, fontSize: 20, fontWeight: "bold"}}> JamboMeet Link</Text>
+  <Text style={{color: "white", marginLeft: 5, fontSize: 25, fontWeight: "bold"}}> TuChat</Text>
    </View>
 
    {
@@ -61,10 +61,12 @@ export default function Link() {
         <>
         <Text style={styles.directives}>Kindly Scan the Qr code displayed on your Laptop/Computer to link your JamboMeet Account</Text>
         <View style={styles.cameraPort}>
-<Camera style={{flex: 1}}
+<Camera style={styles.camera}
 device={device}
-isActive={true}
+frameProcessor={codeScanner.frameProcessor}
 codeScanner={codeScanner}
+frameProcessorFps={5}
+isActive={!linked}
 />
         </View>
         </>
@@ -89,7 +91,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#000",
         alignItems: "center",
-        paddingTop: 50,
+        paddingTop: 10,
+    },
+    camera: {
+width: "100%",
+height: "100%",
+borderRadius: "10",
+overflow: "hidden",
     },
     head: {
 flexDirection: "row",

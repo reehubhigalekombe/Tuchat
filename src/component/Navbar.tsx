@@ -58,7 +58,7 @@ onRequestClose={() => setMenuVisible(false)}
        </View>
     </TouchableOpacity>
 
-       <TouchableOpacity onPress={() =>  {setMenuVisible(false)}}>
+       <TouchableOpacity onPress={() =>  {setMenuVisible(false); navigation.navigate("Link" as never);}}>
         <View style={styles.settingIcon}>
                <Icon  name="link-outline" size={22} color="white" />
  <Text style={styles.menuStaff}>App-Link</Text>
@@ -88,9 +88,7 @@ onRequestClose={() => setMenuVisible(false)}
         </View>
     </TouchableOpacity>
 
-
 </Modal>
-
 
 <View style={styles.botNav}>
 {tabs.map((tab) => (
