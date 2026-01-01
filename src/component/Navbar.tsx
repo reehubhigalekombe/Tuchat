@@ -2,14 +2,18 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/Ionicons"
+import Icon from "react-native-vector-icons/Ionicons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 type Props = {
   activeTab: string;
-  setActiveTab: (tab: string) => void
+  setActiveTab: (tab: string) => void;
+  setIsAuthenticated: (v: boolean) => void;
+  currentUser: {id: string; name: string; handle: string}
 };
-
-export default function Navbar({activeTab, setActiveTab}: Props) {
+const BASE_URL = "http://10.0.2.2:3000";
+export default function Navbar({activeTab, setActiveTab, setIsAuthenticated}: Props) {
   const navigation = useNavigation();
   const tabs = [
     {name: "Camera",  icon: "camera-outline"},
@@ -19,6 +23,23 @@ export default function Navbar({activeTab, setActiveTab}: Props) {
   ];
   const [menuVisible, setMenuVisible] = useState(false);
 
+const handleLogOut = async (
+  setIsAuthenticated: (v: boolean) => void,
+navigation: any, 
+ws?: WebSocket | null,
+currentUser?: {id: string}
+) => {
+try {
+  if(!currentUser?.id) throw new Error ("User not found");
+ await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser});
+ ws?.close();
+ await AsyncStorage.clear();
+  setIsAuthenticated(false);
+   navigation.navigate("Login")
+}catch(err) {
+  console.error("Sorry logout Failed", err)
+}
+}
   return(
 <View style={styles.port}>
 
@@ -36,6 +57,7 @@ export default function Navbar({activeTab, setActiveTab}: Props) {
   </TouchableOpacity>
 </View>
 </View> 
+
 <Modal 
 visible={menuVisible}
 transparent
@@ -43,6 +65,7 @@ animationType="fade"
 onRequestClose={() => setMenuVisible(false)}
 >
   <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.floatModal}>
+
 <View style={styles.menu}>
 <TouchableOpacity onPress={() => {setMenuVisible(false); navigation.navigate("OwnerProfile" as never);}}>
 <View style={styles.settingIcon}>
@@ -72,7 +95,9 @@ onRequestClose={() => setMenuVisible(false)}
         </View>
     </TouchableOpacity>
 
-    <TouchableOpacity onPress={() => setMenuVisible(false)}>
+    <TouchableOpacity onPress={() => 
+    handleLogOut(setIsAuthenticated, navigation, undefined, currentUser)
+  }>
         <View style={styles.settingIcon}>
                <Icon  name="power-outline" size={22} color="white" />
  <Text style={styles.menuStaff}>Log-Out</Text>
@@ -80,14 +105,6 @@ onRequestClose={() => setMenuVisible(false)}
     </TouchableOpacity>
 </View>
   </TouchableOpacity>
-
-  <TouchableOpacity onPress={() => setMenuVisible(false)}>
-        <View style={styles.settingIcon}>
-               <Icon  name="power-outline" size={22} color="white" />
- <Text style={styles.menuStaff}>Log-Out</Text>
-        </View>
-    </TouchableOpacity>
-
 </Modal>
 
 <View style={styles.botNav}>
@@ -99,10 +116,10 @@ onRequestClose={() => setMenuVisible(false)}
     navigation.navigate(tab.name as never)
   }}>
     <Icon name={tab.icon}  size={24} 
-    color={activeTab === tab.name ? "#4CAF50" : "#aaa" }/>
+    color={activeTab === tab.name ? "rgba(10, 157, 241, 1)" : "#aaa" }/>
 <Text style={[
   styles.text,
-  activeTab === tab.name && { color: "#4CAF50", fontWeight: "bold" }
+  activeTab === tab.name && { color: "rgba(10, 157, 241, 1)", fontWeight: "bold" }
 ]}>
 {tab.name}
 </Text>

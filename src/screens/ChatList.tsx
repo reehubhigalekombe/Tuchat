@@ -4,7 +4,6 @@ import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
 
-
 const dummyUsers = [
     {
         id: "1", name: "Ken",
@@ -13,10 +12,10 @@ const dummyUsers = [
         lastMessage: "Hello, kindly wait till kesho very early in the morning!!",
         message: [
              {
-            id: "ml", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "1-l", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "ml", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "1-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "2:01 PM"
@@ -30,10 +29,10 @@ const dummyUsers = [
           lastMessage: "Hello dear",
         message: [
              {
-            id: "ml", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "2-l", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "ml", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "2-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12.27 PM"
@@ -47,10 +46,10 @@ const dummyUsers = [
           lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
         message: [
              {
-            id: "m1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "3-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "3-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12: 20 PM"
@@ -64,10 +63,10 @@ const dummyUsers = [
           lastMessage: "Akombe, share the MVP, I wanna take a look at it",
         message: [
              {
-            id: "m3", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "4-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m4", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "4-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "9.27 AM"
@@ -81,10 +80,10 @@ const dummyUsers = [
           lastMessage: "Kindly, get me posted if you are still showng up tommorow",
         message: [
              {
-            id: "m5", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "5-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m6", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "5-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "9.23 AM"
@@ -99,10 +98,10 @@ const dummyUsers = [
           lastMessage: "Mluhya uko aje, how the going so fur",
         message: [
              {
-            id: "m7", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "6-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m8", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "6-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "8:56 AM"
@@ -116,10 +115,10 @@ const dummyUsers = [
           lastMessage: "Yes Mulembe  Mum, I will call kesho",
         message: [
              {
-            id: "m9", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "7-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m10", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "7-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "8:01 AM"
@@ -132,10 +131,10 @@ const dummyUsers = [
           lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
         message: [
              {
-            id: "m11", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "8-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m12", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "8-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12: 20 PM"
@@ -149,10 +148,10 @@ const dummyUsers = [
           lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
         message: [
              {
-            id: "m13", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "9-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m14", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "9-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12: 20 PM"
@@ -166,10 +165,10 @@ const dummyUsers = [
           lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
         message: [
              {
-            id: "m15", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "10-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m16", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "10-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12: 20 PM"
@@ -183,10 +182,10 @@ const dummyUsers = [
           lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
         message: [
              {
-            id: "m17", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
+            id: "11-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
          {
-            id: "m18", text: "How is the going so fur", sender: "me", time: "11.27 AM"
+            id: "11-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
         },
         ],
         timeStamp: "12: 20 PM"

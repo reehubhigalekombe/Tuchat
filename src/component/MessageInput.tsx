@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity,StyleSheet, Alert, Text} from "react-native";
+import React, { useState, useRef } from "react";
+import { View, TextInput, TouchableOpacity,StyleSheet, Alert, Text, PermissionsAndroid, Platform} from "react-native";
 import  Icon from "react-native-vector-icons/Ionicons";
 import { launchImageLibrary, launchCamera } from "react-native-image-picker";
-
+import AudioRecorderPlayer from "react-native-audio-recorder-player"
 
 type Props = {
     onSend: (message: string) => void;
@@ -19,7 +19,67 @@ export default function MessageInput({onSend, onToggleEmoji, onUploadFile}: Prop
 
     const [input, setInput] = useState("");
     const[showUploadOptions, setShowUploadOptions] = useState(false)
-     const handleUploadPress = () => setShowUploadOptions(!showUploadOptions)
+    const[isRecording, setIsRecording] = useState(false);
+    const [recordedFile, setIsRecordedFile] = useState<any>(null);
+    const[recordingDuration, setRecordingDurartion] = useState(0)
+
+    const audioRecorderPlayerRef =  useRef<AudioRecorderPlayer | null>(null);
+    if(!audioRecorderPlayerRef.current) {
+        audioRecorderPlayerRef.current = new AudioRecorderPlayer();
+    }
+            const audioRecorderPlayer = audioRecorderPlayerRef.current!
+
+    const handleUploadPress = () => setShowUploadOptions(!showUploadOptions);
+
+     const requestMicPermission =async () => {
+        if(Platform.OS === "android") {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+            );
+            return granted === PermissionsAndroid.RESULTS.GRANTED
+        }
+        return true;
+     };
+
+     const startRecording =  async () => {
+        if(isRecording) return;
+        const hasPermission = await requestMicPermission();
+        if(!hasPermission) {
+            Alert.alert("Permission has been denied",  "Microphone set is required");
+            return;
+        }
+        const path = Platform.select({
+            ios: "voice.m4a",
+            android: `${AudioRecorderPlayer.DEFAULT_FILE_PATH}${DarkTheme.now()}_voice.m4a`,
+        });
+
+        await audioRecorderPlayer.startRecorder(path!);
+        setIsRecording(true)
+        setRecordingDurartion(0);
+
+        audioRecorderPlayer.addPlayBackListener((e) => {
+            setRecordingDurartion(Math.floor(e.currentPosition /1000))
+        })
+     }
+
+     const stopRecording = async () => {
+        if(!audioRecorderPlayer) return;
+
+        const uri = await audioRecorderPlayer.stopRecorder();
+        audioRecorderPlayer.removeRecordBackListener();
+        setIsRecording(false)
+
+        if(!uri) return;
+
+        const audioFile = {
+            uri,
+            name: `voice_${Date.now()}.m4a`,
+            type: "audio/m4a",
+            size: 0,
+            duration: recordingDuration
+        };
+        onUploadFile?.(audioFile)
+     }
 
     const handleSend = () => {
         if(input.trim()) {
@@ -127,8 +187,6 @@ Alert.alert("Error", "Failed to pick Video")
   <Text style={{fontSize: 12, color:"#666", marginTop: 3}}>Video</Text>
                         </TouchableOpacity>
 
-                  
-                  
                         </View>
                 ) }
 <View style={styles.mainPort}>
@@ -153,8 +211,20 @@ multiline
 />
 {
     input.trim().length === 0 ? (
-        <TouchableOpacity style={styles.iconButtons}>
-            <Icon name="mic" size={26} color="gray"/>
+        <TouchableOpacity
+        style={styles.iconButtons}
+        onPressIn={startRecording}
+        onPressOut={stopRecording}
+       >
+ <Icon   
+name={isRecording ? "mic" : "mic-outline"} size={26}
+color={isRecording ? "blue" : "gray"}
+ />
+ {
+    isRecording && (
+        <Text style={{position: "absolute", top: -20, fontSize: 14, color: "red"}}>
+            Recording{recordingDuration}s</Text>
+    )}
         </TouchableOpacity>
     ) : (
         <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
@@ -189,7 +259,7 @@ mainPort: {
 inputs: {
     flex: 1,
     marginRight: 6,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 6,
     borderRadius: 20,
     borderColor:"#f0f0f0",

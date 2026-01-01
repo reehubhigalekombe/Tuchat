@@ -9,21 +9,24 @@ import Icon  from "react-native-vector-icons/Ionicons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
+import {AnimatedCircularProgress} from "react-native-circular-progress"
+import AudioRecorderPlayer from "react-native-audio-recorder-player";
 export default function Chats() {
 
     type Message = { id: string; text: string;
-    sender?: string, timeStamp: string, type? : "text" | "image" | "video" | "file";  file?: any
+    sender?: string, timeStamp: string, type? : "text" | "image" | "audio" | "video" | "file";  file?: any
 };
 
 type RouteParams ={
-    user: {
-        id: string, name: string, avatar: string,  online: boolean,
+    user: {id: string, name: string, avatar: string,  online: boolean,
         lastMessage? :string, message? : Message[], timeStamp? : string
     };
 };
 
   const route = useRoute();
-    const navigation = useNavigation()
+    const chatId = `1_${user?.id}`
+    const navigation = useNavigation();
+    const audioPlayer = new AudioRecorderPlayer()
     const user  = (route.params as RouteParams | undefined )?.user;
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -42,9 +45,23 @@ type RouteParams ={
     const [currentPDFUrl, setCurrentPDFUrl] = useState("");
     const[currentFileName, setCurrentFileName] = useState("")
     const ws = useRef<WebSocket | null>(null);
-    const BASE_URL = "http://10.0.2.2:5002";
-    const WS_URL = "ws://10.0.2.2:5002";
-    
+    const BASE_URL = "http://10.0.2.2:3000";
+    const WS_URL = "ws://10.0.2.2:3000";
+
+        const handlePlayAudio = async (uri: string) => {
+try { await audioPlayer.startPlayer(uri);
+    audioPlayer.addPlayBackListener((e) => {
+        if(e.currentPosition >= e.duration){
+            audioPlayer.stopPlayer();
+            audioPlayer.removePlayBackListener();
+        }
+    });
+
+}catch(err) {
+    console.log("Audio play error:", err);
+    Alert.alert("Error", "Could not Play audio")
+}
+        }
         const handleImagePress = (imageUri: string) => {
         const allImages = messages
         .filter(msg => msg.type === "image" && msg.file)
@@ -165,14 +182,22 @@ type RouteParams ={
        const handleUploadFile = (file: any) => {
             console.log("Filed received in Chat:", file);
 
-            let messageType: "image" | "video" | "file" = "file";
+            let messageType: "image" | "video"| "audio"  | "file" = "file";
             if(file.type.includes("image")) messageType = "image";
-             if(file.type.includes("video")) messageType = "video";
+            else if(file.type.includes("video")) messageType = "video";
+            else if(file.type.includes("audio")) messageType = "audio";
+             
 
                     const newMessage: Message = {
             id: Date.now().toString(),
-            text: messageType === "image" ? "photo" : 
-            messageType === "video" ?  "vidoe" : "Document",
+            text: 
+            messageType === "image" 
+            ? "photo" 
+            : messageType === "video"
+             ?  "vidoe" 
+             : messageType === "audio" 
+             ?  "Voice Message"
+             : "Document",
             sender: "me",
             timeStamp: new Date().toISOString(),
             type: messageType,
@@ -190,75 +215,75 @@ type RouteParams ={
         };
  
  useEffect(() => {
+    if(!user?.id)  {
+        return;
+    }
+    const myUSerId = "me";
+    const chatId = [myUSerId, user.id].sort().join("_");
+
     const fetchMessages = async () => {
         try{
-            const res = await axios.get(`${BASE_URL}/messages`);
-            console.log("Fetching from the backend", res.data);
+            const res = await axios.get(`${BASE_URL}/messages/${chatId}`);
 
-            const formartted = res.data.map((msg: any) => ({
+            const formartted= res.data.map((msg: any) => ({
                 id: msg._id,
                 text: msg.text,
-                sender: msg.sender,
-                timeStamp: msg.timeStamp || new Date().toISOString(),
-                type: "text"
+                sender: msg.senderId,
+                timeStamp: msg.createdAt,
+                type: msg.type,
+                file: msg.file || null
             }));
-            setMessages(formartted)
+
+            setMessages(formartted.reverse());
         }catch(err) {
             console.error("Error found while retriveing the messages:",err)
         }
     };
-               fetchMessages();
-               ws.current = new WebSocket(WS_URL);
+    
+    fetchMessages();
+  
+ ws.current = new WebSocket(WS_URL);
 ws.current.onopen = () => {
   console.log("WebSocket connected successfully");
   
-  ws.current?.send(JSON.stringify({
-    type: "join", user: "me"
-  }))
+  ws.current?.send(
+    JSON.stringify({
+    type: "join", 
+    userId: myUSerId,
+    chatId,
+  })
+);
 };
 
 ws.current.onmessage = (event) => {
   try {
     const data = JSON.parse(event.data);
 
-    if(data.type === "file") {
+    if(data.type === "join" || data.type === "status") return
+         
         const newMessage: Message = {
-            id: Date.now().toString(),
-            text: data.file.type.includes("image") ? "photo" : 
-                    data.file.type.includes("video") ? "video" : "Document",
-                    sender: data.sender,
-                    timeStamp: new Date().toISOString(),
-                    type: data.file.type.includes("image") ? "image" :
-                    data.file.type.includes("video") ? "video" : "file",
-                    file: data.file
+            id: data._id ||  Date.now().toString(),
+            text: data.text, 
+            sender: data.senderId,
+            timeStamp: data.createdAt || new Date().toISOString(),
+            type: data.type,
+            file: data.file || null,
         };
         setMessages((prev) => [newMessage, ...prev]);
         return;
-    }
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: data.message,
-      sender: data.sender,
-      timeStamp: new Date().toISOString()
-    };
-    setMessages((prev) => [newMessage, ...prev]);
-
-    if(data.type === "status") {
-        setIsOnline(data.online)
-        return;
-    }
   } catch (err) {
     console.error("WebSocket message parse error:", err);
   }
 };
                ws.current.onerror = (err) =>
                 console.error("WebSocket error", err);
+
                ws.current.onclose = () =>
                 console.log("WebSocket has been closed");
                return () =>{
                 ws.current?.close()
                }
- }, [user?.name])
+ }, [user?.id, ]);
 
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
@@ -270,8 +295,16 @@ const newMessage: Message = {
     timeStamp: new Date().toISOString(),
     type: "text"
 };
+
 setMessages((prev) => [ newMessage, ...prev]);
-ws.current?.send(JSON.stringify({message: msg, sender: "me"}))
+const payload = {
+    type: "text",
+    chatId,
+    senderId: "me",
+    receiverId: user.id,
+    text: msg,
+}
+ws.current?.send(JSON.stringify(payload))
 setInput("")
     };
 
@@ -281,10 +314,45 @@ setInput("")
 
      const renderMessage = ({item}: {item: Message}) => {
         const isMe = item.sender === "me";
-        if (item.type === "image" || item.type === "video" || item.type === "file") {
+        if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {
             const fileIcon = item.type === "file" ? getFileIcon(item.file) : null
 return (
     <View style={[styles.fileContainer, isMe ? styles.myFileMessage :  styles.theirFileMessage]}>
+{
+    item.type === "audio" && item.file && (
+      <View style={[styles.audioPort, isMe ? styles.myFileMessage : styles.theirMessageFile]}>
+  <TouchableOpacity  style={styles.fileContent} activeOpacity={0.7}
+        onPress={handlePlayAudio(item.file.uri)}>
+            <View style={{flexDirection: "row", alignItems: "row"}}>
+<Icon name="mic" size={26} color= "#007AFF"/>
+
+<View style={{flex: 1, marginHorizontal: 10}}>
+    <Text style={{fontSize: 16, color: "back"}}>Voice Message</Text>
+{
+    item.file.duration && (
+        <Text  style={{fontSize: 13, color: "#777"}} >{item.file.duration}s</Text>
+    )}
+
+    <AnimatedCircularProgress 
+size={100}
+width={4}
+file={item.progress * 100}
+tintColor="#007AFF"
+backgroundColor="#eee"
+/>
+</View>
+<Icon name="play-circle" size={26} color= "#007AFF"/>
+            </View>  
+        </TouchableOpacity>
+        <Text style={styles.timeStamp}>
+    {new Date(item.timeStamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+    })}
+</Text> 
+        </View>
+    )
+}
 {
     item.type ==="image" && item.file && (
         <TouchableOpacity style={styles.fileContent} onPress={() => handleImagePress(item.file.uri)}
@@ -335,31 +403,36 @@ item.type === "file"  && item.file && (
     </View>
 )}
         return (
-            <View style={[
-                styles.messageBubble,  isMe ? styles.myMessage : styles.theirMessage
-            ]}>
-        <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.theirMessage]} >
-            {item.text} </Text>
-
-    <Text style={styles.timeStamp}>
+<View style={[styles.messageWarp, isMe ? styles.myWrap : styles.theirWrap]}>
+ <View style={[styles.messageBubble,  isMe ? styles.myMessage : styles.theirMessage ]}>
+        <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.theirMessage]} > {item.text} </Text>
+            </View>
+                <Text style={[
+                    styles.timeStampOut, isMe ? styles.myTime : styles.theirTime
+                ]}>
 {new Date(item.timeStamp).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
 })}
     </Text>
-            </View>
+</View>         
         );
     };
+
+      if(!user) {
+        return <ChatList/>
+    }
     return(
 <SafeAreaView style={styles.container}>
 <KeyboardAvoidingView
-style={{flex: 1}}
+style={{flex: 1, }}
 behavior={Platform.OS === "ios" ? "padding" : undefined}
 keyboardVerticalOffset={90}
 >
     <View style={styles.background}>
         <View style={styles.header}> 
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrow}>
+            <View style={styles.leftHand}>
+   <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrow}>
             <Icon name="chevron-back" size={26} color="white" />
         </TouchableOpacity>
        
@@ -367,11 +440,20 @@ keyboardVerticalOffset={90}
          <Image  source={{uri:  user.avatar}}
         style={styles.avatar}  />
        </TouchableOpacity>
-        <View style={styles.status}>
-            <Text style={styles.senderName}>{user.name}</Text>
+        <Text style={styles.senderName}>{user.name}</Text>
+            </View>
+     
+        <View style={styles.rightHand}>
+    <TouchableOpacity style={{marginHorizontal: 8, padding: 4}}
+     onPress={() => navigation.navigate("Calls" as never)}>
+            <Icon name="call-outline" size={26} color="white" />
+    </TouchableOpacity>
 
-
-        <Text style={isOnline  ? styles.online :  styles.offline}>
+        <TouchableOpacity style={{marginHorizontal: 8, padding: 4}}
+           onPress={() => navigation.navigate("VideoCall" as never)}>
+              <Icon name="videocam-outline" size={26} color="white" />
+    </TouchableOpacity>
+ <Text style={isOnline  ? styles.online :  styles.offline}>
             {isOnline? "online" : "offline"}
         </Text>
         </View>
@@ -385,17 +467,13 @@ keyboardVerticalOffset={90}
         data={messages} 
         keyExtractor={(item) =>item.id}
         renderItem={renderMessage}
-        inverted
-        />
+        inverted />
    )}
 </View>
-
 <Emoji  
 visible={showEmoji}
 onSelect={ handleEmojiSelect}
-onClose={() => setShowEmoji(false)}
-
-/>
+onClose={() => setShowEmoji(false)}/>
 
 <View style={styles.wrapper}>
 <MessageInput 
@@ -435,7 +513,7 @@ const  styles = StyleSheet.create({
     container: {
         flex: 1,  width: "100%",
     },
-    background: {  flex: 1, backgroundColor: "#f0f0f0"
+    background: {  flex: 1, backgroundColor: "#2e2d2dff", 
     },
     fileContainer: {
 alignSelf: "flex-end", maxWidth: "70%", marginVertical: 10
@@ -470,16 +548,16 @@ messageBubble: {
     alignSelf: "flex-start",  maxWidth: "70%", padding: 10, borderRadius: 20, marginVertical: 5,
 }, 
 myMessage: {
-    alignSelf: "flex-end", backgroundColor: "#3fed3fff", borderRadius: 20
+    alignSelf: "flex-end", backgroundColor: "rgba(10, 157, 241, 1)", borderRadius: 20
 },
 header: {
-flexDirection: "row", alignItems: "center", backgroundColor: "#171616ff", borderColor: "white", borderBottomWidth: 0.1, padding: 12,
+flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: "#0a0a0aff", paddingHorizontal: 10, paddingVertical: 8
 },
-status: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
+rightHand: {
+flexDirection: "row", alignItems: "center", 
+},
+leftHand: {
+flexDirection: "row", alignItems: "center"
 },
 
 senderName: {
@@ -487,14 +565,24 @@ fontSize: 24, color: "white", fontWeight: "bold", marginLeft: 5, fontFamily: "Ti
 },
 
 online: {
-    fontSize: 18,  color: "white",  fontFamily: "Times New Roman",
+    fontSize: 18,  color: "rgba(10, 157, 241, 1)",  fontFamily: "Times New Roman",
 },
 offline: {
-   fontSize: 14,  color: "green", fontFamily: "Times New Roman",   
+   fontSize: 14,  color: "#999", fontFamily: "Times New Roman",   
 },
 wallpaper: {
     width: "100%",
     flex: 1,
+}, messageWrap: {
+maxWidth: "75%", marginVertical: 6
+},
+myWrap: {
+alignSelf: "flex-end",
+alignItems: "flex-end"
+},
+theirWrap: {
+alignSelf: "flex-start",
+alignItems: "flex-start"
 },
 theirMessage: {
 alignSelf: "flex-start", backgroundColor: "#ffffff", borderRadius: 20,
@@ -534,17 +622,23 @@ messageText: { fontSize: 18, textAlign: "justify",
     wrapper: {
         backgroundColor: "transparent",
     },
-    timeStamp: {
-        fontSize: 13, alignSelf: "flex-end", marginTop: 4, color: "#333"
+    timeStampOut: {
+        fontSize: 13, opacity: 0.6, marginTop: 4
+    },
+    myTime: {
+marginRight: 4, color: "#fff"
+    },
+    theirTime: {
+marginLeft: 4, color: "white", fontWeight: "500"
     },
     image: {
         width: 250, height: 200, borderRadius: 12, marginBottom: 10
     },
     fileName: {
-fontSize: 14, color: "#999", marginBottom: 5
+fontSize: 14, color: "#fff", marginBottom: 5
     },
     fileText: {
-fontSize: 15, color: "#080808ff", fontWeight: "400", marginBottom: 5
+fontSize: 15, color: "#fff", fontWeight: "400", marginBottom: 5
     },
     pdfView: {
 position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, backgroundColor: "#ffff"
