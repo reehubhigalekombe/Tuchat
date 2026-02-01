@@ -111,9 +111,6 @@ export default function VideoCall() {
     const tileSize = width/columns - 20;
     return(
         <View style={styles.Port}>
-           <View style={styles.remoteVid}>
-            <Text style={{color: "white", fontSize: 18, fontWeight: "bold"}}>Remote Video will be streaming soon</Text>
-           </View>
      {
         participants.length === 1 && (
                    <View style={styles.localeVid}>
@@ -185,10 +182,6 @@ const styles = StyleSheet.create({
 Port: {
     flex: 1,
     backgroundColor: "#000"
-},
-remoteVid: {
-    width, height, position: "absolute", top: 0, left: 0, justifyContent: "center", alignItems: "center",
-    backgroundColor: "#111"
 },
 poort: {
     flex: 1,

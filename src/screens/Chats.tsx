@@ -11,6 +11,22 @@ import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
 import {AnimatedCircularProgress} from "react-native-circular-progress"
 import AudioRecorderPlayer from "react-native-audio-recorder-player";
+
+const getInitials = (name: string) => {
+  if (!name) return "";
+
+  const parts = name.trim().split(" ");
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[1].charAt(0).toUpperCase()
+  );
+};
+
 export default function Chats() {
 
     type Message = { id: string; text: string;
@@ -432,13 +448,22 @@ keyboardVerticalOffset={90}
     <View style={styles.background}>
         <View style={styles.header}> 
             <View style={styles.leftHand}>
-   <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrow}>
+   <TouchableOpacity onPress={() => navigation.navigate("Chats" as never)} style={styles.arrow}>
             <Icon name="chevron-back" size={26} color="white" />
         </TouchableOpacity>
        
        <TouchableOpacity onPress={() => navigation.navigate("Profile", {user})}>
-         <Image  source={{uri:  user.avatar}}
-        style={styles.avatar}  />
+      {
+          user.avatar ? (
+              <Image source={{uri: user.avatar}} style={styles.avatar}  />
+          ) : (
+              <View style={styles.avatarFall} >
+                 <Text style={styles.avatarText} >
+                   {getInitials(user.name)}
+                 </Text>
+              </View>
+          )
+      }
        </TouchableOpacity>
         <Text style={styles.senderName}>{user.name}</Text>
             </View>
@@ -646,5 +671,19 @@ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, backgr
     pdfHead: {
         flexDirection: "row", paddingHorizontal: 15, paddingVertical: 10, justifyContent: "center",
         alignItems: "center", backgroundColor: "#007AFF", paddingTop: Platform.OS === "ios" ? 50 : 10
-    }
+    },
+       avatarFall: {
+width: 50,
+height: 50,
+justifyContent: "center",
+alignItems: "center",
+borderRadius: 25,
+marginRight: 10,
+backgroundColor: "#fff", 
+    },
+    avatarText: {
+color: "#999", 
+fontSize:22,
+   fontWeight: "bold",
+    },
 })

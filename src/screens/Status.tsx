@@ -147,8 +147,10 @@ hasNew={item.hasNew}
 <View style={styles.head}>
 <Text style={{fontSize: 24, fontWeight: "bold"}}>Status</Text>
 
-<View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
-     <Text style={{fontSize: 24, fontWeight: "bold", marginRight: 10}}> Go Live</Text>
+<View style={{flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10}}>
+ <TouchableOpacity onPress={() => navigation.navigate("Live" as never)} style={styles.liive}>
+        <Text style={{fontSize: 24, fontWeight: "bold", marginRight: 10, color: "#fff"}}> Go Live</Text>
+ </TouchableOpacity>
     <TouchableOpacity >
     <Icon name="radio-button-on-outline" size={25} color= "red"  />
 </TouchableOpacity>
@@ -270,5 +272,8 @@ marginLeft: 4, fontSize: 16, fontWeight: 500, color:  "#000"
         fontSize: 16,
         color: "rgba(10, 157, 241, 1)",
         marginTop: 3
+    },
+    liive: {
+backgroundColor: "rgb(72, 186, 252)", borderRadius:  12
     }
 })

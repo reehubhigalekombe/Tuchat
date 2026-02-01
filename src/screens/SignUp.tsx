@@ -1,6 +1,8 @@
 import React, {useState}from "react";
 import { useNavigation } from "@react-navigation/native";
-import { View, StyleSheet, TextInput, TouchableOpacity, Alert, Text } from "react-native";
+import { View, StyleSheet, TextInput, TouchableOpacity,
+    KeyboardAvoidingView, Platform, Image,
+    Alert, Text } from "react-native";
 import axios from "axios";
 
 const BASE_URLL = "http://10.0.2.2:3000";
@@ -24,10 +26,23 @@ export default function SignUp() {
 
     }
     return(
+<KeyboardAvoidingView  
+style={styles.viewPort}
+behavior={Platform.OS === "ios" ? "padding" : undefined}
+>
+    <Image 
+    source={{uri: "https://drive.google.com/uc?export=view&id=1AgQd8Qgku8gXG8iyoFZgSkBNCGgMDaKX"}} style={styles.avatar}
+    />
 <View style={styles.port}>
-<TextInput placeholder="Name" value={name}  onChangeText={setName} style={styles.input} />
-<TextInput placeholder="TuChat handle i.e @higal" value={handle}  onChangeText={setHandle}  style={styles.input}  />
-<TextInput placeholder="Password" secureTextEntry value={password}  onChangeText={setPassword}  style={styles.input}  />
+<TextInput placeholder="Name" value={name} 
+placeholderTextColor="#666"
+ onChangeText={setName} style={styles.input} />
+<TextInput placeholder="TuChat handle i.e @higal" 
+placeholderTextColor="#666"
+value={handle}  onChangeText={setHandle}  style={styles.input}  />
+<TextInput placeholder="Password"
+placeholderTextColor="#666"
+ secureTextEntry value={password}  onChangeText={setPassword}  style={styles.input}  />
 <TouchableOpacity onPress={handleSignUp}>
     <Text>Sign Up</Text>
 </TouchableOpacity>
@@ -38,13 +53,24 @@ export default function SignUp() {
 </Text>
 </View>
 
+
+</KeyboardAvoidingView>
+        
+
     )
 }
 const styles = StyleSheet.create({
+        viewPort: {
+flex: 1, backgroundColor: "#000", justifyContent: "center", padding: 20,
+    },
     port: {
-flex: 1, justifyContent: "center", padding: 20
+flex: 1, justifyContent: "center", padding: 30, backgroundColor: "#111"
     },
     input: {
-borderWidth: 1, marginBottom: 10, padding: 6
+borderWidth: 1, fontSize: 16, color: "#fff",
+ marginBottom: 10, padding: 6, borderColor: "#222", borderRadius: 10, 
+ paddingVertical: 10, paddingHorizontal: 12,   backgroundColor: "#000"
+    },
+    avatar: { width: 90, height: 90, borderRadius: 45, alignSelf: "center", marginBottom: 10,
     }
 })

@@ -215,7 +215,7 @@ export default function ChatList() {
 
   <TouchableOpacity
     style={styles.float}
-    onPress={() => navigation.navigate("StartChat" as never)}
+    onPress={() => navigation.navigate("AddCall" as never)}
   >
     <View style={styles.chatText}>
       <Icon name="add" size={26} color="white" />
@@ -225,20 +225,23 @@ export default function ChatList() {
   
 <View style={styles.bottomNav} >
 <View style={styles.bots}>
-    <TouchableOpacity onPress={() => navigation.navigate("Live" as never) } style={styles.botItem}>
+    <TouchableOpacity onPress={() => navigation.navigate("Live" as never, {
+      isHost: true,
+      liveId: "public-live"} as never) }
+       style={styles.botItem}>
 <Text style={styles.navText}>Live</Text>
 </TouchableOpacity>
 </View>
 
 <View style={styles.bots}>
-<TouchableOpacity onPress={() => navigation.navigate("Groups" as never) } style={styles.botItem}>
+<TouchableOpacity onPress={() => navigation.navigate("Viewer" as never) } style={styles.botItem}>
 <Text style={styles.navText}>Groups</Text>
 </TouchableOpacity>
 </View>
  
 <View style={styles.bots}>
-<TouchableOpacity onPress={() => navigation.navigate("Trends" as never) } style={styles.botItem}>
-<Text style={styles.navText}>Trends</Text>
+<TouchableOpacity onPress={() => navigation.navigate("Host" as never) } style={styles.botItem}>
+<Text style={styles.navText}>Host</Text>
 </TouchableOpacity>
 </View>
             </View>
@@ -251,7 +254,7 @@ export default function ChatList() {
 }
 const styles = StyleSheet.create({
         float: {
-        position: "absolute", bottom: 80, right: 20, backgroundColor: "black",    elevation: 2,
+        position: "absolute", bottom: 80, right: 20, backgroundColor: "#1f2020ff",    elevation: 2,
         zIndex: 2,
         height: 60, width: 150, borderRadius: 30, alignItems: "center", justifyContent: "center"
     },

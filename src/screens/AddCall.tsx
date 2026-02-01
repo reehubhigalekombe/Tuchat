@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation} from "@react-navigation/native";
 import Icon  from "react-native-vector-icons/Ionicons";
 
 
@@ -25,8 +25,6 @@ const dummyContacts: Contact[] =[
 { id: "11", name: "Mathe", phoneNumber: "+254742236109"}, 
 ]
 export default function AddCall() {
-    const route = useRoute<any>();
-    const {onContactSelect} = route.params || {};
     const navigation = useNavigation();
     const[search, setSearch] = useState("");
     const filteredContacts = dummyContacts.filter((c) => 
@@ -34,14 +32,18 @@ export default function AddCall() {
 );
 
 const handleContactSelect = (contact: Contact) => {
-    console.log("Adding to call", contact.name);
-    if(onContactSelect && typeof onContactSelect === "function") {
-        onContactSelect(contact)
-    }
-
-    navigation.goBack()
-
-}
+    navigation.navigate("Chats" as never, {
+   user: {
+            id: contact.id,
+            name: contact.name,
+            phoneNumber: contact.phoneNumber,
+            avatar: null,
+            messages: [],
+        },
+        isNewChat: true,
+    } as never
+);
+};
     return (
 <View style={styles.port}>
    

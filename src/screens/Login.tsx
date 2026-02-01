@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import axios from "axios";
+import * as Keychain from "react-native-keychain";
 import { useNavigation } from "@react-navigation/native";
 import { View,Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
     TextInput, TouchableOpacity, Alert, Text } from "react-native";
@@ -20,6 +21,7 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
         try {
             setLoading(true)
             const res = await axios.post(`${BASE_URLL}/auth/login`, { handle, password});
+            await Keychain.setGenericPassword("auth", res.data.token);
             Alert.alert(`Woow, Login Sucess, ${res.data.user.handle}`);
 
             setIsAuthenticated(true)
@@ -99,7 +101,5 @@ borderWidth: 1, fontSize: 16, color: "#fff",
          paddingVertical: 10,       
     }, 
     avatar: { width: 90, height: 90, borderRadius: 45, alignSelf: "center", marginBottom: 10,
-        
-
     }
 })

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity} from "react-native";
 
 type Props = {
     user: {
-        id: string, name: string, avatar: string, online: boolean,  lastMessage?: string,
+        id: string, name: string, avatar: string | null, online: boolean,  lastMessage?: string,
         timeStamp?: string,
 
     };
@@ -11,20 +11,36 @@ type Props = {
     onPressAvatar: () => void
 }
 
+const getInitials = (name: string) => {
+  if (!name) return "";
+
+  const parts = name.trim().split(" ");
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[1].charAt(0).toUpperCase()
+  );
+};
+
 export default function ChatItem({user, onPressRow, onPressAvatar}: Props) {
     return(
         
 <TouchableOpacity onPress={onPressRow}  style={styles.chatItem}>
         <TouchableOpacity onPress={onPressAvatar} style={{position: "relative", marginLeft: 2}}>
-<Image 
-        source={{uri: user.avatar}}
-        style={styles.avatar}/>
-        <View 
-        style={[
-            styles.statusDot,
-            {backgroundColor: user.online ? "blue" : "gray"}
-        ]}
-        />
+{user.avatar ? (
+        <Image source={{uri: user.avatar}} style={styles.avatar}  />
+    ) : (
+        <View style={styles.avatarFall} >
+           <Text style={styles.avatarText} >
+             {getInitials(user.name)}
+           </Text>
+        </View>
+    )
+}
          </TouchableOpacity>
 
          <View style={styles.mid}>
@@ -73,6 +89,20 @@ justifyContent: "flex-start"
 width: 12,
 height:12,
 borderRadius: 6, right: 2, position: "absolute", top: 2, borderWidth: 1, borderColor: "white"
+    },
+    avatarFall: {
+width: 50,
+height: 50,
+justifyContent: "center",
+alignItems: "center",
+borderRadius: 25,
+marginRight: 10,
+backgroundColor: "blue"
+    },
+    avatarText: {
+color: "#fff", 
+fontSize:22,
+   fontWeight: "bold",
     },
     name: {
         fontSize:22,

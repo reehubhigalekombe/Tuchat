@@ -17,6 +17,9 @@ import StatusView from "../screens/StatusView";
 import Edit from "../screens/Edit";
 import BuildStatus from "../screens/BuildStatus";
 import Link from "../screens/Link";
+import Live from "../screens/Live";
+import Host from "../screens/Host";
+import Viewer from "../screens/Viewer";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,7 +32,7 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
         <>
          <Navbar activeTab={activeTab} setActiveTab={setActiveTab}
          setIsAuthenticated={setIsAuthenticated}
-         currentUser={currentUser}
+
           />
          <Stack.Navigator>
               <Stack.Screen name="Chats" component={Chats} />
@@ -48,6 +51,9 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
             <Stack.Screen  name="BuildStatus" component={BuildStatus} />
              <Stack.Screen  name="Edit" component={Edit} />
              <Stack.Screen name="Link"  component={Link}   />
+                <Stack.Screen name="Live"  component={Live}   />
+                <Stack.Screen name="Host" component={Host}   />
+                        <Stack.Screen name="Viewer" component={Viewer}   />
          </Stack.Navigator>
         </>
     );

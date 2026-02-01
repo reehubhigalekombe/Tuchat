@@ -6,9 +6,9 @@ export default function EmptyChat() {
     return (
      
 <View style={styles.emptyPort}>
-    <Icon name="chatbubble-ellipses-outline" size={140} color="green"/>
+    <Icon name="chatbubble-ellipses-outline" size={140} color="#fff"/>
     <Text style={styles.text}>
-     Chat With JAMBO!!
+     TuChat
     </Text>
 </View>
 

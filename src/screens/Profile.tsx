@@ -5,6 +5,7 @@ import Icon  from "react-native-vector-icons/Ionicons";
 
 export default function Profile() {
     const navigation = useNavigation();
+
     const route = useRoute<any>();
     const {user} = route.params;
     const [qoute, setQoute] = useState("Memories are immortal");
