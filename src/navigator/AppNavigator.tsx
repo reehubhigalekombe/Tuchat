@@ -20,6 +20,7 @@ import Link from "../screens/Link";
 import Live from "../screens/Live";
 import Host from "../screens/Host";
 import Viewer from "../screens/Viewer";
+import User from "../screens/User";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,17 +30,15 @@ interface AppNavigatorProps {
 export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
     const [activeTab, setActiveTab] = useState("Chats")
     return (
-        <>
+       <User>
+         <>
          <Navbar activeTab={activeTab} setActiveTab={setActiveTab}
          setIsAuthenticated={setIsAuthenticated}
-
-          />
-         <Stack.Navigator>
+         />
+         <Stack.Navigator screenOptions={{headerShown: false}}>
               <Stack.Screen name="Chats" component={Chats} />
     <Stack.Screen name="Camera" component={CameraScr} />
-    <Stack.Screen  name="StatusView" component={StatusView} 
-    options={{headerShown: false}}
-    />
+    <Stack.Screen  name="StatusView" component={StatusView}/>
       <Stack.Screen name="Calls" component={Calls} />
       <Stack.Screen name="Status" component={Status} />
      <Stack.Screen name="ChatList" component={ChatList} />
@@ -56,5 +55,6 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
                         <Stack.Screen name="Viewer" component={Viewer}   />
          </Stack.Navigator>
         </>
+       </User>
     );
 }

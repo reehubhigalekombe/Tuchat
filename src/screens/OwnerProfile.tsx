@@ -1,15 +1,22 @@
 import React, { useState } from"react";
+import { useNavigation } from "@react-navigation/native";
 import { TouchableWithoutFeedback } from "react-native";
-import { useNavigation} from "@react-navigation/native";
 import { View, Image, ActivityIndicator,  Modal, TouchableOpacity, Text, ScrollView, StyleSheet, Alert} from "react-native";
 import Icon  from "react-native-vector-icons/Ionicons";
 import { launchImageLibrary, launchCamera } from "react-native-image-picker";
+import { UserContext } from "./User";
 
 export default function OwnerProfile() {
+
     const navigation = useNavigation()
-    const[avatar, setAvatar] = useState("https://randomuser.me/api/portraits/women/1.jpg")
     const[modalVisible, setModalVisible] = useState(false);
     const[loading, setLoading] = useState(false);
+    
+    const userContext = userContext(UserContext);
+    if(!userContext){
+        throw new Error("UserContext is not defined")
+    }
+    const {avatar, setAvatar}= useContext;
 
 const showImagePickerOptions = () => {
     Alert.alert(
@@ -98,8 +105,7 @@ const handleChangeAvatar = () => {
 
 <ScrollView style={styles.mainContainer}>
 <View style={styles.picContainer}>
-<TouchableOpacity
-   
+<TouchableOpacity onPress={() => navigation.goBack}
     style={{left: 10, position: "absolute"}} >
     <Icon  name="chevron-back" size={24} color="green" />
 </TouchableOpacity>

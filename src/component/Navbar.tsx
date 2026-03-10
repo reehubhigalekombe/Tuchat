@@ -1,10 +1,11 @@
-
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Image, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useContext } from "react";
+import { UserContext } from "../screens/User";
 
 type Props = {
   activeTab: string;
@@ -13,15 +14,12 @@ type Props = {
   currentUser: {id: string; name: string; handle: string}
 };
 const BASE_URL = "http://10.0.2.2:3000";
+
 export default function Navbar({activeTab, setActiveTab, setIsAuthenticated}: Props) {
   const navigation = useNavigation();
-  const tabs = [
-    {name: "Camera",  icon: "camera-outline"},
-        {name: "Chats",  icon: "chatbubble-ellipses-outline"},
-        {name: "Status",  icon: "ellipse-outline"},
-            {name: "Calls",  icon: "call-outline"},       
-  ];
+const[search, setSearch] = useState("")
   const [menuVisible, setMenuVisible] = useState(false);
+  const {avatar} = useContext(UserContext)!
 
 const handleLogOut = async (
   setIsAuthenticated: (v: boolean) => void,
@@ -44,16 +42,14 @@ try {
 <View style={styles.port}>
 
 <View style={styles.topNav}>
-<Text style={{fontSize: 24, color: "white", fontWeight: "bold"}}>TuChat</Text>
-
+ <View style={styles.topNa}>
+   <Image source={{uri: "https://drive.google.com/uc?export=view&id=1FTBlSIIkFmEIuotP17CWq_Nq7Oeb2dO-"}} style={styles.logo} />
+<Text style={{fontSize: 30, color: "white", fontWeight: "400"}}>TuChat</Text>
+ </View>
 <View style={{flexDirection: "row"}}>
-  <TouchableOpacity style={styles.iconBut}>
-<Icon name="search-outline"  size={24} color="white"/>
-  </TouchableOpacity>
-
     <TouchableOpacity style={styles.iconBut}
     onPress={() => setMenuVisible(true)}>
-<Icon name="menu-outline"  size={24} color="white"/>
+<Icon name="menu-outline"  size={27} color="white"/>
   </TouchableOpacity>
 </View>
 </View> 
@@ -108,23 +104,45 @@ onRequestClose={() => setMenuVisible(false)}
 </Modal>
 
 <View style={styles.botNav}>
-{tabs.map((tab) => (
-  <TouchableOpacity key={tab.name}
-  style={styles.tabsItem} 
-  onPress={() => {
-    setActiveTab(tab.name);
-    navigation.navigate(tab.name as never)
-  }}>
-    <Icon name={tab.icon}  size={24} 
-    color={activeTab === tab.name ? "rgba(10, 157, 241, 1)" : "#aaa" }/>
-<Text style={[
-  styles.text,
-  activeTab === tab.name && { color: "rgba(10, 157, 241, 1)", fontWeight: "bold" }
-]}>
-{tab.name}
-</Text>
-  </TouchableOpacity>
-))}
+<TouchableOpacity style={styles.tabItem}
+onPress={() => {
+  setActiveTab("Chats")
+  navigation.navigate("Chats" as never)
+}}>
+<Text style={styles.texts}>Chats</Text>
+</TouchableOpacity>
+
+<View style={styles.search}>
+  <TextInput 
+placeholder="Search....."
+placeholderTextColor={"#fff"}
+value={search}
+onChangeText={setSearch}
+style={styles.searchBar}
+clearButtonMode="while-editing"
+underlineColorAndroid="transparent"
+/>
+<TouchableOpacity onPress={() => search.length > 0 && setSearch("")}
+  style={styles.icon} activeOpacity={0.7}>
+
+{search.length > 0 ? (
+  <Icon name="close-outline" size={18} color="#fff"  />
+) : (
+  <Icon name="search-outline" size={18} color="#fff"  />
+)}
+</TouchableOpacity>
+</View>
+
+<TouchableOpacity onPress={() => {
+  setActiveTab("Profile")
+  navigation.navigate("OwnerProfile" as never)
+}}
+style={styles.tabItem}>
+
+<Image source={{uri: avatar}} style={[styles.profAvatar,
+  activeTab === "Profile" && styles.activeProfile
+]}   />
+</TouchableOpacity>
 </View>
 </View>
   )
@@ -140,33 +158,65 @@ topNav: {
   paddingHorizontal: 15,
   paddingVertical: 15
 },
+logo:  {
+width: 40, height: 40, borderRadius: 20
+},
+topNa: {
+flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center"
+},
 iconBut: {
   marginLeft: 12
 },
 botNav: {
-  flexDirection: "row", justifyContent: "space-around", 
-  backgroundColor: "#1f2020ff"
+  flexDirection: "row", justifyContent: "space-around",  alignItems: "center",
+  backgroundColor: "#1f2020ff", height: 60
 },
 tabsItem: {
-  alignItems: "center", paddingVertical: 8, flex:1
+  alignItems: "center", paddingVertical: 8, flex:1, justifyContent: "center",
+  width: 60,
+  height: "100%"
 },
-text: {
-  color: "#aaa",
+texts: {
+  color: "rgba(10,157,241,1)",
   fontWeight: "bold",
-  marginTop: 4, fontSize: 16
+  marginTop: 0, fontSize: 22, textAlign: "center",
+  marginLeft: 2
+  
 },
 floatModal: {
   flex: 1, backgroundColor: "#999"
 }, 
 menu: {
   position: "absolute", top: 50, right: 120, borderRadius: 8, padding: 10, elevation: 5,
-  backgroundColor: "black"
+  backgroundColor: "black" 
 },
 settingIcon: {
   flexDirection: "row", paddingHorizontal:12, paddingVertical: 6, alignItems: "center"
 },
  menuStaff: {
   fontSize: 20, color: "white", padding: 8
+}, 
+tabItem: {
+alignItems: "center", width:60, 
+},
+search: {
+flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#2a2b2b",
+paddingHorizontal: 12, marginHorizontal: 12, borderRadius: 20, height: 44,
+elevation: 3, shadowColor: "#000", shadowOpacity: 0.3, shadowRadius:4
+
+},
+searchBar: {
+  flex: 1, fontSize: 18, color: "#fff", height: "100%", textAlignVertical: "center"
+},
+icon: {
+  position: "absolute", right: 10
+}, 
+
+activeProfile: {
+  borderWidth: 2, borderColor:"rgba(10,157,241,1)"
+}, 
+profAvatar: {
+  width: 40, height: 40, borderRadius: 20,
 }
 
 })

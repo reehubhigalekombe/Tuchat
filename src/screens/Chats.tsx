@@ -61,8 +61,9 @@ type RouteParams ={
     const [currentPDFUrl, setCurrentPDFUrl] = useState("");
     const[currentFileName, setCurrentFileName] = useState("")
     const ws = useRef<WebSocket | null>(null);
-    const BASE_URL = "http://10.0.2.2:3000";
-    const WS_URL = "ws://10.0.2.2:3000";
+
+const BASE_URL = "http://10.0.2.2:3000";
+const WS_URL = "ws://10.0.2.2:3000";
 
         const handlePlayAudio = async (uri: string) => {
 try { await audioPlayer.startPlayer(uri);

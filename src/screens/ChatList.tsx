@@ -3,7 +3,7 @@ import { FlatList, View, TouchableOpacity, Text, StyleSheet } from "react-native
 import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
-
+import BottomScreen from "./BottomScreen";
 const dummyUsers = [
     {
         id: "1", name: "Ken",
@@ -184,14 +184,9 @@ const dummyUsers = [
              {
             id: "11-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
         },
-         {
-            id: "11-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
+         { id: "11-2", text: "How is the going so fur", sender: "me", time: "11.27 AM" },
         ],
-        timeStamp: "12: 20 PM"
-       
-    },
-
+        timeStamp: "12: 20 PM"  },
 ]
 export default function ChatList() {
     const navigation = useNavigation();
@@ -219,32 +214,10 @@ export default function ChatList() {
   >
     <View style={styles.chatText}>
       <Icon name="add" size={26} color="white" />
-      <Text style={{ color: "white", fontSize: 22 }}>New Chat</Text>
     </View>
   </TouchableOpacity>
   
-<View style={styles.bottomNav} >
-<View style={styles.bots}>
-    <TouchableOpacity onPress={() => navigation.navigate("Live" as never, {
-      isHost: true,
-      liveId: "public-live"} as never) }
-       style={styles.botItem}>
-<Text style={styles.navText}>Live</Text>
-</TouchableOpacity>
-</View>
-
-<View style={styles.bots}>
-<TouchableOpacity onPress={() => navigation.navigate("Viewer" as never) } style={styles.botItem}>
-<Text style={styles.navText}>Groups</Text>
-</TouchableOpacity>
-</View>
- 
-<View style={styles.bots}>
-<TouchableOpacity onPress={() => navigation.navigate("Host" as never) } style={styles.botItem}>
-<Text style={styles.navText}>Host</Text>
-</TouchableOpacity>
-</View>
-            </View>
+<BottomScreen/>
 </View>
 
             
@@ -254,12 +227,12 @@ export default function ChatList() {
 }
 const styles = StyleSheet.create({
         float: {
-        position: "absolute", bottom: 80, right: 20, backgroundColor: "#1f2020ff",    elevation: 2,
+        position: "absolute", bottom: 100, right: 20, backgroundColor: "#1f2020ff",    elevation: 2,
         zIndex: 2,
-        height: 60, width: 150, borderRadius: 30, alignItems: "center", justifyContent: "center"
+        height: 60, width: 60, borderRadius: 30, alignItems: "center", justifyContent: "center"
     },
     chatText: {
-        flexDirection: "row", color: "white", alignItems: "center", gap: 4, padding: 8, 
+        color: "white", alignItems: "center",   justifyContent: "center"
     },
     bottomNav: {
         flexDirection: "row",
