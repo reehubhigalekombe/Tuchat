@@ -1,9 +1,10 @@
 import React from "react";
-import { FlatList, View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { FlatList, View, TouchableOpacity, StyleSheet, Text} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
-import BottomScreen from "./BottomScreen";
+import { contacts } from "../data/contacts";
+
 const dummyUsers = [
     {
         id: "1", name: "Ken",
@@ -188,26 +189,68 @@ const dummyUsers = [
         ],
         timeStamp: "12: 20 PM"  },
 ]
-export default function ChatList() {
+export default function ChatList({search}) {
     const navigation = useNavigation();
+    const query = search?.toLowerCase() || "";
+
+    const filteredContacts = contacts.filter(contact => 
+    contact.name.toLowerCase().includes(query) || 
+    contact.phoneNumber?.includes(query)
+    )
+
+    const filteredChats = dummyUsers.filter(chat => 
+      chat.name.toLowerCase().includes(query)
+    );
+
+    const mergedData = query.length > 0
+    ? [
+       ...filteredChats.map(item => ({...item, type: "chat"})),
+      ...filteredContacts.map(item => ({...item, type: "contact"}))
+    ]
+      : dummyUsers.map(item => ({...item, type: "chat"}))
     return(
 <View style={{flex: 1}}>
-<View style={{ flex: 1 }}>
+
   <FlatList
-    data={dummyUsers}
+    data={mergedData}
     keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
-      <ChatItem
-        user={item}
-        onPressRow={() => navigation.navigate("Chats", { user: item })}
-        onPressAvatar={() => navigation.navigate("Profile", { user: item })}
-      />
-    )}
+    renderItem={({ item }) => {
+
+      if (item.type === "chat")  {
+        return (
+          <ChatItem user={item}
+          onPressRow={() => navigation.navigate("Chats", {user: item})}
+          onPressAvatar={() => navigation.navigate("Profile", {user: item})}
+          />
+        )
+      }
+
+      return(
+        <TouchableOpacity 
+        style={styles.myContact}
+        onPress={() => navigation.navigate("Chats", {
+          user: {
+            id: item.id,
+            name: item.name,
+            avatar: null,
+            messages: [],
+          },
+          isNewChat: true
+        })}>
+          
+          <View style={styles.avatarContact}>
+<Text style={styles.avaText}>
+  {item.name}
+</Text>
+          </View>
+        </TouchableOpacity>
+      )
+
+    }}
     contentContainerStyle={{ paddingBottom: 150 }}
     showsVerticalScrollIndicator={true}
     persistentScrollbar={true}
   />
-
   <TouchableOpacity
     style={styles.float}
     onPress={() => navigation.navigate("AddCall" as never)}
@@ -216,46 +259,30 @@ export default function ChatList() {
       <Icon name="add" size={26} color="white" />
     </View>
   </TouchableOpacity>
-  
-<BottomScreen/>
-</View>
 
-            
 </View>
 
     )
 }
 const styles = StyleSheet.create({
         float: {
-        position: "absolute", bottom: 100, right: 20, backgroundColor: "#1f2020ff",    elevation: 2,
+        position: "absolute", bottom: 20, right: 15, backgroundColor: "#1f2020ff",    elevation: 2,
         zIndex: 2,
-        height: 60, width: 60, borderRadius: 30, alignItems: "center", justifyContent: "center"
+        height: 70, width: 70, borderRadius: 35, alignItems: "center", justifyContent: "center"
     },
     chatText: {
         color: "white", alignItems: "center",   justifyContent: "center"
     },
-    bottomNav: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        left:0,
-        right: 0,
-        position: "absolute",
-        paddingVertical: 10,
-        zIndex: 1,
-        bottom: 1,
-     
+    myContact: {
+      flexDirection: "row", alignItems: "center", padding: 15, borderBottomWidth: 1,
+      borderBottomColor: "#333"
     },
-
-    botItem: {paddingHorizontal: 15,
-
-    },
-    navText: {
-        color: "white",
-        fontWeight: "400",
-        fontSize: 22
-    },
-    bots: {
-        backgroundColor: "black", height: 50, width: 120, borderRadius: 30, justifyContent: "center", alignItems: "center"
+    avatarContact: {
+      width: 60, height: 60, borderRadius: 30, justifyContent: "center",
+      alignItems: "center", marginRight: 10, 
+  backgroundColor: "#0a9df1"
     }
+   
 })
+
+

@@ -1,4 +1,4 @@
-import React, { useState } from"react";
+import React, { useState, useContext } from"react";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableWithoutFeedback } from "react-native";
 import { View, Image, ActivityIndicator,  Modal, TouchableOpacity, Text, ScrollView, StyleSheet, Alert} from "react-native";
@@ -12,11 +12,11 @@ export default function OwnerProfile() {
     const[modalVisible, setModalVisible] = useState(false);
     const[loading, setLoading] = useState(false);
     
-    const userContext = userContext(UserContext);
+    const userContext = useContext(UserContext);
     if(!userContext){
         throw new Error("UserContext is not defined")
     }
-    const {avatar, setAvatar}= useContext;
+    const {avatar, setAvatar}= useContext(UserContext)
 
 const showImagePickerOptions = () => {
     Alert.alert(
@@ -107,7 +107,7 @@ const handleChangeAvatar = () => {
 <View style={styles.picContainer}>
 <TouchableOpacity onPress={() => navigation.goBack}
     style={{left: 10, position: "absolute"}} >
-    <Icon  name="chevron-back" size={24} color="green" />
+    <Icon  name="chevron-back" size={24} color= "rgba(10,157,241,1)"/>
 </TouchableOpacity>
  <Text style={styles.title}> Profile</Text>
 </View>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View,  Text, StyleSheet, TouchableOpacity , Image, Alert} from "react-native";
+import { View,  Text, StyleSheet, TouchableOpacity , Image, Alert, SafeAreaView} from "react-native";
 import io from "socket.io-client";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -156,184 +156,93 @@ if(!isSpeaker) {
 setIsSpeaker(prev => !prev)
     }
     return(
-<View style={styles.port}> 
-      <View style={styles.liveHead} >
-        <View style={styles.live}>
- <Icon name="radio-button-on-outline" size={25} color= "red"  />
-        <Text    style={{color: "white", fontSize: 20, fontWeight: "bold"}}>Live</Text>
-        </View>
-            <View style={styles.live}>
-            <Icon name="heart" size={25} color= "rgba(10, 157, 241, 1)"  />
-               <Text   style={{color: "white", fontSize: 20, marginRight: 10}}>{Viewers} </Text>
-        </View>
-           
-        
-    </View>
-{isHost && localStream &&  (
-        <RTCView  streamURL = {localStream.toURL()}
-        style={styles.remoteVid}
-        />
+<View style={styles.port}>
+    {localStream && (
+        <RTCView streamURL={localStream.toURL()}  style={styles.video}/>
     )}
-
-{isHost && remoteStream && (
-        <RTCView streamURL={remoteStream.toURL()}
-style={styles.remoteVid}
-        />
-    )}
-  
-{!localStream && isHost && <Text>Loading Camera......</Text>}
-
-<View style={styles.rightControls}>
-
-    <TouchableOpacity style={styles.avatarContainer}  activeOpacity={0.7} 
-    onPress={() => navigation.navigate("Profile" as never, {user} as never)}>
-        <Image  source={{uri: avatar }} style={styles.image} />
+    <SafeAreaView style={styles.liveHead}>
+<View style={styles.left}>
+    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBut}>
+        <Icon name="arrow-back" size={26} color="#fff"/>
     </TouchableOpacity>
 
-    <TouchableOpacity style={styles.add}  activeOpacity={0.7}>
-        <Icon name="add" size={20} color="white" />
-    </TouchableOpacity>
-
-     <TouchableOpacity style={[styles.grounds, isSpeaker && styles.speaker]} activeOpacity={0.7}
-     onPress={toggleSpeaker}>
-    <Icon name={isSpeaker ?  "volume-mute" : "volume-high"} size={30} 
-    color={isSpeaker ?  "#fff" : "#fff"  }  />
-    </TouchableOpacity>   
-
-     <TouchableOpacity style={[styles.grounds, isMuted && styles.muteBut]} activeOpacity={0.7} onPress={toggleMute}>
-    <Icon name={isMuted ? "mic-off" : "mic"} size={30}
-     color={isMuted ? "#E53935" : "#fff"} />
-    </TouchableOpacity>   
-
-     <TouchableOpacity style={[styles.grounds,  isFrontCamera && styles.rearBut]} activeOpacity={0.7}
-     onPress={flipCamera}>
-    <Icon name="camera-reverse" size={30}
-     color= {isFrontCamera ?  "#FFF"  : "#fff" } />
-    </TouchableOpacity>   
-
-     <TouchableOpacity style={[styles.grounds, styles.endCall]} activeOpacity={0.7}
-     onPress={endCall}>
-    <Icon name="call-outline" size={30} color= "#fff"  />
-    </TouchableOpacity>   
+    <Icon name="radio-button-on" size={26} color="red"  />
+    <Text style={styles.liveText}>Live</Text>
 </View>
-
-
-<View style={styles.outline}>
-<View style={styles.side}>
-    <TouchableOpacity style={styles.ground} activeOpacity={0.7}>
-        <Text style={styles.text}>Join</Text>
-    </TouchableOpacity>
+<View style={styles.right}>
+    <Icon name="eye-outline"  size={26} color= "#fff"/>
+<Text style={styles.viewerText}>{Viewers}</Text>
 </View>
- 
- <View style={styles.center}>
-  <TouchableOpacity style={styles.ground} activeOpacity={0.7}>
-    <Icon name="chatbubbles-outline" size={25} color= "#000"  />
-    </TouchableOpacity>   
-
-<TouchableOpacity style={styles.ground} 
-onPress={() => {
-    socket.current.emit("invite-cohost", {
-        liveId,
-        from: socket.current.id
-    })
-}}
-activeOpacity={0.7}>
- <Icon name="person-add" size={25} color= "#000"  />
+    </SafeAreaView>
+   
+    <View style={styles.rightControls}>
+<TouchableOpacity style={styles.avatarControls}>
+<Image source={{uri: avatar}} style={styles.image} />
 </TouchableOpacity>
 
-    <TouchableOpacity  style={styles.ground} 
-    onPress={() => {
-        socket.current.emit("live-like", {liveId})
-    }}
-    activeOpacity={0.7}>
-<Icon name="heart" size={25} color= "#E53935" />
-    </TouchableOpacity>
- </View>
-   <View style={styles.side}>
-      <TouchableOpacity style={styles.ground} activeOpacity={0.7}>
-        <Text style={styles.text}>Exit</Text>
-    </TouchableOpacity>
-  
-   </View>
-</View>
+<TouchableOpacity onPress={toggleSpeaker} style={styles.circle}>
+    <Icon name="volume-high" size={26} color= "#fff" />
+</TouchableOpacity>
+
+<TouchableOpacity onPress={toggleMute} style={styles.circle}>
+        <Icon name={isMuted ? "mic-off" : "mic"} size={26} color= "#fff" />
+</TouchableOpacity>
+
+<TouchableOpacity style={styles.circle} onPress={flipCamera}>
+        <Icon name="camera-reverse"  size={26} color="#fff"/>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={endCall} style={[styles.circle, styles.end]}>
+    <Icon name="call-outline"  size={26} color="#fff"/>
+</TouchableOpacity>
+    </View>
 </View>
     )
 }
 const styles = StyleSheet.create({
     port: {
-flex: 1, backgroundColor: "#112"
+        backgroundColor: "#000",
+        flex: 1
+    },
+    video: {
+        width: "100%",
+        height: "100%"
     },
     liveHead: {
-position: "absolute",  top: 40, gap: 10, left: 20, right: 20, zIndex: 10, flexDirection: "row",   justifyContent: "space-between" , alignItems: "center"
-    }, 
-    remoteVid: {
-        width: "100%", height: "100%"
+        position: "absolute", top: 0, right: 0, left: 0, zIndex: 10, flexDirection: "row",
+        justifyContent: "space-between", alignItems: "center", paddingHorizontal: 6, paddingVertical: 8,
+backgroundColor: "rgba(0,0,0,0.3)",
     },
-    live: {
-        flexDirection: "row", gap: 10, justifyContent: "center", alignItems: "center",marginLeft: 10
+    left: {
+        flexDirection: "row", alignItems: "center", gap: 8
     }, 
-    outline :  { position: "absolute", bottom: 10, zIndex: 10, left: 10, right: 10,
-         justifyContent: "space-between" , alignItems: "center",
-        flexDirection: "row", 
-        paddingVertical:6, paddingHorizontal: 10, borderRadius: 10
+    backBut: {
+marginRight: 8, padding: 8
+    },
+    liveText: {
+        color: "#fff", fontSize: 18, fontWeight: "400"
+    },
+    right: {
+            flexDirection: "row", alignItems: "center", gap: 8
     }, 
-    side: {
-width: 75, alignItems: "center"
-    },
-    center: {
-flexDirection: "row", flex: 1, justifyContent: "center", gap: 15
-    },
-    text: {
-        color: "#000", fontSize: 20, fontWeight: "500"
-    }, ground: {
-        width: 62, height: 36,
-        backgroundColor: "#fff",
-        borderRadius: 18,
-        alignItems: "center",
-        justifyContent: "center",
-        elevation: 3,
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        shadowOffset: {width: 0, height: 2}
+    viewerText:  {
+        fontSize: 18, fontWeight: "400"
     },
     rightControls: {
         position: "absolute",
-        right: 16,
-        bottom: 120,
-        zIndex: 20,
-        alignItems: "center",
-        gap: 15,
-        marginRight: 10
+        right: 16, bottom: 120, alignItems: "center", gap: 15
     },
-    endCall: {
-        backgroundColor:  "#E53935",
+    avatarControls: {
+width: 70, height: 70, borderRadius: 35, overflow: "hidden", borderWidth: 2, borderColor: "#0a9df1",
     },
-    grounds: {
-        width: 60, height: 60,
-        backgroundColor: "rgba(0,0,0,0.6)",
-        borderRadius: 30,
-        alignItems: "center",
-        justifyContent: "center",
-        elevation: 4,
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        shadowOffset: {width: 0, height: 2}
-    },
-    muteBut: {backgroundColor: "#999"},
-    rearBut: {
-        backgroundColor: "#999"
-    }, 
-    speaker: {backgroundColor: "#999"},
-    image:  {
+    image: {
         width: "100%", height: "100%"
     },
-    add: {position: "absolute", top: 30, right: 10, width: 20, height: 20, borderRadius: 10, backgroundColor: "#E53935",
-        justifyContent: "center", alignItems: "center", elevation: 5
+    circle: { width: 60, height: 60, borderRadius: 30, backgroundColor:"rgba(0,0,0,0.6)",
+        alignItems: "center", justifyContent: "center"
+
     },
-    avatarContainer: {width: 66, height: 66, borderRadius: 33, overflow: "hidden",
-        marginRight: 10, position: "relative", borderWidth: 2, borderColor: "rgba(10, 157, 241, 1)"
-
+    end: {
+backgroundColor: "#E53935"
     }
-  
-
 })

@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
-
-import Navbar from "../component/Navbar";
 
 import Calls from "../screens/Calls";
 import CameraScr from "../screens/CameraScr";
 import ChatList from "../screens/ChatList";
 import Status from "../screens/Status";
-import Chats from "../screens/Chats";
+
 import Profile from "../screens/Profile";
 import ZoomImage from "../screens/ZoomImage";
 import AddCall from "../screens/AddCall";
@@ -21,6 +19,8 @@ import Live from "../screens/Live";
 import Host from "../screens/Host";
 import Viewer from "../screens/Viewer";
 import User from "../screens/User";
+import Home from "../screens/Home";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -28,15 +28,17 @@ interface AppNavigatorProps {
     setIsAuthenticated: (value: boolean) => void
 }
 export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
-    const [activeTab, setActiveTab] = useState("Chats")
+
     return (
        <User>
          <>
-         <Navbar activeTab={activeTab} setActiveTab={setActiveTab}
-         setIsAuthenticated={setIsAuthenticated}
-         />
          <Stack.Navigator screenOptions={{headerShown: false}}>
-              <Stack.Screen name="Chats" component={Chats} />
+        <Stack.Screen name="Home">
+{() => (
+    <Home setIsAuthenticated={setIsAuthenticated}   />
+)
+}
+        </Stack.Screen>
     <Stack.Screen name="Camera" component={CameraScr} />
     <Stack.Screen  name="StatusView" component={StatusView}/>
       <Stack.Screen name="Calls" component={Calls} />
@@ -50,8 +52,8 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
             <Stack.Screen  name="BuildStatus" component={BuildStatus} />
              <Stack.Screen  name="Edit" component={Edit} />
              <Stack.Screen name="Link"  component={Link}   />
-                <Stack.Screen name="Live"  component={Live}   />
-                <Stack.Screen name="Host" component={Host}   />
+            <Stack.Screen name="Live"  component={Live}   />
+             <Stack.Screen name="Host" component={Host}   />
                         <Stack.Screen name="Viewer" component={Viewer}   />
          </Stack.Navigator>
         </>

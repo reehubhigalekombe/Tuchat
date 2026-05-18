@@ -27,7 +27,7 @@ const getInitials = (name: string) => {
   );
 };
 
-export default function Chats() {
+export default function Chats({search}) {
 
     type Message = { id: string; text: string;
     sender?: string, timeStamp: string, type? : "text" | "image" | "audio" | "video" | "file";  file?: any
@@ -38,6 +38,7 @@ type RouteParams ={
         lastMessage? :string, message? : Message[], timeStamp? : string
     };
 };
+
 
   const route = useRoute();
     const chatId = `1_${user?.id}`
@@ -158,7 +159,7 @@ try { await audioPlayer.startPlayer(uri);
                     const fileType = file.type ? `Type: ${file.type}` : "Type Unknown";
                     Alert.alert(
                         "File Information",
-                        `Name: ${file.name}\n${fileType}\n${fileSize}\n\nTo open this file, you will need a compatible
+                        `Name: ${file.name}\n${fileType}\n${fileSize}\n\nTo open this file, you will need a compatibl
                         application installed.`,
                         [{text: "OK", style: "default"}]
                     );
@@ -437,7 +438,7 @@ item.type === "file"  && item.file && (
     };
 
       if(!user) {
-        return <ChatList/>
+        return <ChatList search={search}/>
     }
     return(
 <SafeAreaView style={styles.container}>

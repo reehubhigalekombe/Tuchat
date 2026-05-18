@@ -11,13 +11,18 @@ type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   setIsAuthenticated: (v: boolean) => void;
-  currentUser: {id: string; name: string; handle: string}
+  currentUser: {id: string; name: string; handle: string},
+  search: string
+  setSearch: (v: string) => void
+
 };
 const BASE_URL = "http://10.0.2.2:3000";
 
-export default function Navbar({activeTab, setActiveTab, setIsAuthenticated}: Props) {
-  const navigation = useNavigation();
-const[search, setSearch] = useState("")
+export default function Navbar({activeTab, setActiveTab, 
+  setIsAuthenticated,
+   search, setSearch,
+  }: Props) {
+const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const {avatar} = useContext(UserContext)!
 
@@ -40,7 +45,6 @@ try {
 }
   return(
 <View style={styles.port}>
-
 <View style={styles.topNav}>
  <View style={styles.topNa}>
    <Image source={{uri: "https://drive.google.com/uc?export=view&id=1FTBlSIIkFmEIuotP17CWq_Nq7Oeb2dO-"}} style={styles.logo} />
@@ -70,7 +74,7 @@ onRequestClose={() => setMenuVisible(false)}
 </View>
 </TouchableOpacity>
 
-   <TouchableOpacity onPress={() =>  {setMenuVisible(false); navigation.navigate("OwnerProfile" as never);}}>
+   <TouchableOpacity onPress={() =>  {setMenuVisicdble(false); navigation.navigate("Settings" as never);}}>
        <View style={styles.settingIcon}>
           <Icon  name="settings-outline" size={22} color="white" />
 <Text style={styles.menuStaff}>Settings</Text>
@@ -84,7 +88,7 @@ onRequestClose={() => setMenuVisible(false)}
         </View>
     </TouchableOpacity>
 
-     <TouchableOpacity onPress={() => setMenuVisible(false)}>
+    <TouchableOpacity onPress={() => {setMenuVisible(false); navigation.navigate("Support" as never);}}>
         <View style={styles.settingIcon}>
                <Icon  name="hand-left-outline" size={22} color="white" />
  <Text style={styles.menuStaff}>Support & Feedback</Text>
@@ -107,9 +111,11 @@ onRequestClose={() => setMenuVisible(false)}
 <TouchableOpacity style={styles.tabItem}
 onPress={() => {
   setActiveTab("Chats")
-  navigation.navigate("Chats" as never)
 }}>
-<Text style={styles.texts}>Chats</Text>
+<Text style={[
+  styles.texts, (activeTab === "Chats" || activeTab === "Search") && styles.activeText
+]}>
+  Chats</Text>
 </TouchableOpacity>
 
 <View style={styles.search}>
@@ -118,17 +124,26 @@ placeholder="Search....."
 placeholderTextColor={"#fff"}
 value={search}
 onChangeText={setSearch}
+onFocus={() => setActiveTab("Search")}
+returnKeyType="Search"
 style={styles.searchBar}
+onBlur={() => {
+  if(search.length === 0) {
+    setActiveTab("Chats")
+  }
+}}
 clearButtonMode="while-editing"
 underlineColorAndroid="transparent"
 />
-<TouchableOpacity onPress={() => search.length > 0 && setSearch("")}
+<TouchableOpacity onPress={() => {
+  setSearch("");
+}}
   style={styles.icon} activeOpacity={0.7}>
 
 {search.length > 0 ? (
   <Icon name="close-outline" size={18} color="#fff"  />
 ) : (
-  <Icon name="search-outline" size={18} color="#fff"  />
+  <Icon name="search-outline" size={18} color="#ffffff"  />
 )}
 </TouchableOpacity>
 </View>
@@ -184,7 +199,7 @@ texts: {
   
 },
 floatModal: {
-  flex: 1, backgroundColor: "#999"
+  flex: 1, backgroundColor:  "rgba(0,0,0,0.3)",
 }, 
 menu: {
   position: "absolute", top: 50, right: 120, borderRadius: 8, padding: 10, elevation: 5,
@@ -217,6 +232,9 @@ activeProfile: {
 }, 
 profAvatar: {
   width: 40, height: 40, borderRadius: 20,
+},
+activeText: {
+  color: "rgba(10,157,241,1)"
 }
 
 })

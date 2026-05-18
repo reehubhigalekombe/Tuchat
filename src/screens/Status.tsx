@@ -145,7 +145,13 @@ hasNew={item.hasNew}
     return(
         <View style={styles.port}>
 <View style={styles.head}>
+    <View style={styles.statusHead}> 
+        <TouchableOpacity onPress={() => navigation.goBack()}
+            style={styles.backBut} activeOpacity={0.7}> 
+        <Icon name="arrow-back" size={26}  color="rgba(10,157,241,1)"/>
+    </TouchableOpacity>
 <Text style={{fontSize: 24, fontWeight: "bold"}}>Status</Text>
+    </View>
 
 <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10}}>
  <TouchableOpacity onPress={() => navigation.navigate("Live" as never)} style={styles.liive}>
@@ -219,6 +225,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff"
     },
+    statusHead: {
+    flexDirection: "row",  alignItems: "center",
+
+    },
+backBut: {
+marginRight: 8, justifyContent: "center", alignItems: "center", padding: 6,
+borderRadius: 20
+},
     rowTop: {
        flexDirection: 'row',
        alignItems: "center",
