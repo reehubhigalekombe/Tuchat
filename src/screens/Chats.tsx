@@ -39,7 +39,6 @@ type RouteParams ={
     };
 };
 
-
   const route = useRoute();
     const chatId = `1_${user?.id}`
     const navigation = useNavigation();
@@ -63,9 +62,27 @@ type RouteParams ={
     const[currentFileName, setCurrentFileName] = useState("")
     const ws = useRef<WebSocket | null>(null);
 
-const BASE_URL = "http://10.0.2.2:3000";
-const WS_URL = "ws://10.0.2.2:3000";
+const BASE_URL = "https://tuback.onrender.com";
+const WS_URL = "wss://tuback.onrender.com";
 
+useEffect(()  => {
+    const parent = navigation.getParent();
+    parent?.setOptions({
+        tabBarStyle: {display: "none",
+
+        },
+    });
+    return () => {
+        parent?.setOptions({
+            tabBarStyle: {
+                backgroundColor: "#000",
+                height: 80,
+                paddingBottom: 8,
+                paddingTop: 8
+            },
+        })
+    }
+}, [navigation])
         const handlePlayAudio = async (uri: string) => {
 try { await audioPlayer.startPlayer(uri);
     audioPlayer.addPlayBackListener((e) => {
@@ -305,24 +322,18 @@ ws.current.onmessage = (event) => {
 
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
-
-const newMessage: Message = { 
-    id: Date.now().toString(), 
-    text: msg ,
-    sender: "me",
-    timeStamp: new Date().toISOString(),
-    type: "text"
-};
-
-setMessages((prev) => [ newMessage, ...prev]);
-const payload = {
-    type: "text",
-    chatId,
-    senderId: "me",
-    receiverId: user.id,
-    text: msg,
-}
-ws.current?.send(JSON.stringify(payload))
+        const myUserId = "me";
+        const chatId = [myUserId, user.id]
+        .sort()
+        .join("_")
+        const payload = {
+            chatId,
+            sender: myUserId,
+             receiver: user.id,
+            message: msg,
+            type: "text"
+        };
+        ws.current?.send(JSON.stringify(payload));
 setInput("")
     };
 
@@ -444,7 +455,7 @@ item.type === "file"  && item.file && (
 <SafeAreaView style={styles.container}>
 <KeyboardAvoidingView
 style={{flex: 1, }}
-behavior={Platform.OS === "ios" ? "padding" : undefined}
+behavior={Platform.OS === "android" ? "padding" : undefined}
 keyboardVerticalOffset={90}
 >
     <View style={styles.background}>
@@ -588,7 +599,7 @@ flexDirection: "row", alignItems: "center"
 },
 
 senderName: {
-fontSize: 24, color: "white", fontWeight: "bold", marginLeft: 5, fontFamily: "Times New Roman",
+fontSize: 18, color: "white", fontWeight: "400", marginLeft: 2, fontFamily: "Times New Roman",
 },
 
 online: {
@@ -620,7 +631,7 @@ messageText: { fontSize: 18, textAlign: "justify",
         flexDirection: "row",backgroundColor: "white", borderBottomWidth: 0.5,    paddingVertical: 11, paddingHorizontal: 15,
     },
     avatar: {
-        width: 50,  height: 50, borderRadius: 25,   marginRight: 12,
+        width: 40,  height: 40, borderRadius: 20,   marginRight: 6,
     },
     chattingPot: {
         flex: 1
@@ -635,7 +646,7 @@ messageText: { fontSize: 18, textAlign: "justify",
         color: "white"
     },
     arrow: {
-        marginRight: 12,
+        marginRight: 6,
     },
     time: {
         fontSize: 14, color: "green"

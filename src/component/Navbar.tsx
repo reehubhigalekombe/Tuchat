@@ -16,11 +16,11 @@ type Props = {
   setSearch: (v: string) => void
 
 };
-const BASE_URL = "http://10.0.2.2:3000";
+const BASE_URL = "https://tuback.onrender.com";
 
 export default function Navbar({activeTab, setActiveTab, 
   setIsAuthenticated,
-   search, setSearch,
+   search, setSearch, currentUser
   }: Props) {
 const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);

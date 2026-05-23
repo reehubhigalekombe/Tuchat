@@ -1,29 +1,40 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState} from "react";
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet ,
+
+} from "react-native";
 import { useNavigation} from "@react-navigation/native";
 import Icon  from "react-native-vector-icons/Ionicons";
-import { contacts } from "../data/contacts";
+import useContact from "../data/useContact";
 
 type Contact = {
-    id: string,
-    name: string,
-    avatar?: string,
-    phoneNumber?: string,
-}
+    recordID: string;
+    givenName: string;
+    familyName?:  string;
+    phoneNumbers: {
+        number: string}[];
+
+        thumbnailPath?: string;
+        
+};
 export default function AddCall() {
     const navigation = useNavigation();
     const[search, setSearch] = useState("");
-    const filteredContacts = contacts.filter((c) => 
-    c.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-);
+  const contacts = useContact();
+   const filteredContacts = contacts.filter((contact) => {
+    const fullName = 
+  `  ${contacts.givenName} ${contacts.familyName || ""}`.toLowerCase();
+  return fullName.includes(search.toLowerCase())
+   });
+
 
 const handleContactSelect = (contact: Contact) => {
     navigation.navigate("Chats" as never, {
    user: {
-            id: contact.id,
-            name: contact.name,
-            phoneNumber: contact.phoneNumber,
-            avatar: null,
+            id: contact.recordID,
+            name: `${contact.givenName} ${contact.familyName || ""}`,
+            phoneNumber: 
+            contact.phoneNumbers?.[0]?.number || "nNo Number",
+            avatar: thumbnailPath || null,
             messages: [],
         },
         isNewChat: true,
@@ -49,28 +60,34 @@ clearButtonMode="while-editing"
 <View style={styles.header}>
 <Text style={styles.headTitle}>Select Contacts to Add</Text>
 <Text style={styles.headSub}>
-{filteredContacts.length} contacts{filteredContacts.length !==1 ? "s" : ""} found
+{filteredContacts.length} contacts
+{filteredContacts.length !==1 ? "s" : ""} found
 </Text>
 </View>
 <FlatList  
 data={filteredContacts}
-keyExtractor={(item) => item.id}
+keyExtractor={(item) => item.recordID}
 renderItem={({item}) => (
     <TouchableOpacity style={styles.contacts}
     onPress={() => handleContactSelect(item)}>
 
 <View style={styles.avatarPlace}>
-<Text style={{fontSize: 15, color: "white", fontWeight: "bold"}}>{item.name.charAt(0)}</Text>
+<Text style={{fontSize: 15, color: "white", fontWeight: "bold"}}>
+    {item.givenName.charAt(0)}</Text>
 </View>
 <View style={styles.contactInfo}>
-<Text style={{fontSize: 15, color: "#666", marginTop: 3}}>{item.name}</Text>
-{item.phoneNumber && (
-    <Text style={{fontSize: 13, color: "#666", marginTop: 3}}>{item.phoneNumber}</Text>
+<Text style={{fontSize: 15, color: "#666", marginTop: 3}}>
+    {item.givenName} {item.familyName}</Text>
+
+{item.phoneNumbers[0]?.number && (
+    <Text style={{fontSize: 13, color: "#666", marginTop: 3}}>
+        {item.phoneNumbers[0].number}</Text>
 )}
 </View>
 <Icon name="call-outline" size={24} color="#fff" />
     </TouchableOpacity>
 )}
+
 ListEmptyComponent={
     <View style={{alignItems: "center", justifyContent: "center", paddingHorizontal: 20, paddingVertical: 10}}>
       <Icon name="search-outline" size={24} color="gray" />  

@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { View,Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
     TextInput, TouchableOpacity, Alert, Text } from "react-native";
 
-const BASE_URLL = "http://10.0.2.2:3000";
+const BASE_URLL = "https://tuback.onrender.com"
 
 interface LoginProps {
     setIsAuthenticated: (value: boolean) => void

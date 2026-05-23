@@ -1,9 +1,12 @@
 import React from "react";
-import { FlatList, View, TouchableOpacity, StyleSheet, Text} from "react-native";
+import { FlatList, View, TouchableOpacity, StyleSheet, Text,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
-import { contacts } from "../data/contacts";
+
+import useContact from "../data/useContact";
+
 
 const dummyUsers = [
     {
@@ -192,11 +195,15 @@ const dummyUsers = [
 export default function ChatList({search}) {
     const navigation = useNavigation();
     const query = search?.toLowerCase() || "";
+    const contacts = useContact();
 
-    const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(query) || 
-    contact.phoneNumber?.includes(query)
-    )
+    const filteredContacts = contacts.filter((contact) => {
+      const fullName =  `${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
+      const phone = contact.phoneNumbers[0]?.number || "";
+      return (
+        fullName.includes(query) || phone.includes(query)
+      );
+    });
 
     const filteredChats = dummyUsers.filter(chat => 
       chat.name.toLowerCase().includes(query)
@@ -205,7 +212,15 @@ export default function ChatList({search}) {
     const mergedData = query.length > 0
     ? [
        ...filteredChats.map(item => ({...item, type: "chat"})),
-      ...filteredContacts.map(item => ({...item, type: "contact"}))
+
+         ...filteredContacts.map((item) => ({
+        id: item.recordID,
+        name: `${item.givenName} ${item.familyName || ""}`,
+        phoneNumber: item.phoneNumbers[0]?.number || "",
+        avatar: item.thumbnailPath || null,
+        type: "contact"
+       }))
+ 
     ]
       : dummyUsers.map(item => ({...item, type: "chat"}))
     return(
@@ -232,7 +247,8 @@ export default function ChatList({search}) {
           user: {
             id: item.id,
             name: item.name,
-            avatar: null,
+            phoneNumber: item.phoneNumber,
+            avatar: item.avatar,
             messages: [],
           },
           isNewChat: true

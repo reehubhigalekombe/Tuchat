@@ -9,6 +9,7 @@ export default function BottomTab({activeTab, search}) {
     return(
         <Tab.Navigator screenOptions={({route}) => ({
             headerShown: false,
+            tabBarHideOnKeyboard: true,
 
             tabBarItemStyle: {
              justifyContent: "center",

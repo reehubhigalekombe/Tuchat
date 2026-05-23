@@ -5,7 +5,7 @@ import { View, StyleSheet, TextInput, TouchableOpacity,
     Alert, Text } from "react-native";
 import axios from "axios";
 
-const BASE_URLL = "http://10.0.2.2:3000";
+const BASE_URLL = "https://tuback.onrender.com";
 
 export default function SignUp() {
     const navigation = useNavigation();
@@ -44,15 +44,18 @@ value={handle}  onChangeText={setHandle}  style={styles.input}  />
 placeholderTextColor="#666"
  secureTextEntry value={password}  onChangeText={setPassword}  style={styles.input}  />
 <TouchableOpacity onPress={handleSignUp}>
-    <Text>Sign Up</Text>
+    <Text style={{ color: "#0A9DF1", fontSize: 25, }}>Sign Up</Text>
 </TouchableOpacity>
 
-<Text style={{marginTop: 10 }}onPress={() =>navigation.navigate("Login") }>
-    Already have an Account? Login
+<Text style={{textAlign: "center", fontSize: 18, marginTop: 10, color: "#aaa"}}>
+    Already have an Account?  {""}
+    <Text  style={{color: "#0A9DF1", fontWeight: "bold", fontSize: 25, }}
+    onPress={() => navigation.navigate("Login")}>
+        Login
+    </Text>
 
 </Text>
 </View>
-
 
 </KeyboardAvoidingView>
         
@@ -64,13 +67,13 @@ const styles = StyleSheet.create({
 flex: 1, backgroundColor: "#000", justifyContent: "center", padding: 20,
     },
     port: {
-flex: 1, justifyContent: "center", padding: 30, backgroundColor: "#111"
+borderRadius: 12, padding: 30, backgroundColor: "#111"
     },
     input: {
 borderWidth: 1, fontSize: 16, color: "#fff",
  marginBottom: 10, padding: 6, borderColor: "#222", borderRadius: 10, 
  paddingVertical: 10, paddingHorizontal: 12,   backgroundColor: "#000"
     },
-    avatar: { width: 90, height: 90, borderRadius: 45, alignSelf: "center", marginBottom: 10,
+    avatar: { width: 90, height: 90, borderRadius: 45, alignSelf: "center", marginBottom: 15,
     }
 })
