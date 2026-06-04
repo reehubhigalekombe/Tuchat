@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { View,Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
     TextInput, TouchableOpacity, Alert, Text } from "react-native";
 
-const BASE_URLL = "https://tuback.onrender.com"
+const BASE_URLL = "https://tuback-8pr0.onrender.com"
 
 interface LoginProps {
     setIsAuthenticated: (value: boolean) => void
@@ -30,6 +30,7 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
             console.error(err)
             Alert.alert("Error", err.response?.data?.message || "Sorry failed to Login" )
         } finally {
+            setLoading(false)
 
         }
     }

@@ -5,20 +5,23 @@ import { View, StyleSheet, TextInput, TouchableOpacity,
     Alert, Text } from "react-native";
 import axios from "axios";
 
-const BASE_URLL = "https://tuback.onrender.com";
+const BASE_URLL = "https://tuback-8pr0.onrender.com";
 
 export default function SignUp() {
     const navigation = useNavigation();
     const [name, setName] = useState("");
     const [handle, setHandle] = useState("");
     const [password, setPassword] = useState("");
+    const [phone, setPhone] = useState("")
 
     const handleSignUp = async () => {
-        if(!name || !handle || !password) return Alert.alert(" All fields are required to be filled");
+        if(!name || !handle || !phone || !password) return Alert.alert(" All fields are required to be filled");
         try {
-            const res = await axios.post(`${BASE_URLL}/auth/register`, {name, handle, password});
+            const res = await axios.post(`${BASE_URLL}/auth/register`, {name, handle, phone,  password});
             Alert.alert(`Woow, user account has been created, ${res.data.user.handle}`);
-            navigation.navigate("Login");
+            navigation.navigate("Prof", {
+                userId: res.data.user._id
+            });
         }catch (err: any) {
             console.error(err)
             Alert.alert("Error", err.response?.data?.message || "Sorry failed to register" )
@@ -40,6 +43,16 @@ placeholderTextColor="#666"
 <TextInput placeholder="TuChat handle i.e @higal" 
 placeholderTextColor="#666"
 value={handle}  onChangeText={setHandle}  style={styles.input}  />
+
+<TextInput
+placeholder="+254742106109"
+placeholderTextColor="#666"
+value={phone}
+onChangeText={setPhone}
+keyboardType="phone-pad"
+style={styles.input}
+   />
+
 <TextInput placeholder="Password"
 placeholderTextColor="#666"
  secureTextEntry value={password}  onChangeText={setPassword}  style={styles.input}  />

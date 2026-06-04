@@ -30,7 +30,9 @@ const getInitials = (name: string) => {
 export default function Chats({search}) {
 
     type Message = { id: string; text: string;
-    sender?: string, timeStamp: string, type? : "text" | "image" | "audio" | "video" | "file";  file?: any
+    sender?: string, timeStamp: string, 
+    status?: "sending" | "sent" | "delivered" | "seen",
+    type? : "text" | "image" | "audio" | "video" | "file";  file?: any
 };
 
 type RouteParams ={
@@ -62,8 +64,8 @@ type RouteParams ={
     const[currentFileName, setCurrentFileName] = useState("")
     const ws = useRef<WebSocket | null>(null);
 
-const BASE_URL = "https://tuback.onrender.com";
-const WS_URL = "wss://tuback.onrender.com";
+const BASE_URL = "https://tuback-8pr0.onrender.com";
+const WS_URL = "wss://tuback-8pr0.onrender.com";
 
 useEffect(()  => {
     const parent = navigation.getParent();
@@ -265,6 +267,7 @@ try { await audioPlayer.startPlayer(uri);
                 text: msg.text,
                 sender: msg.senderId,
                 timeStamp: msg.createdAt,
+                status: msg.status,
                 type: msg.type,
                 file: msg.file || null
             }));
@@ -323,10 +326,19 @@ ws.current.onmessage = (event) => {
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
         const myUserId = "me";
-        const chatId = [myUserId, user.id]
-        .sort()
-        .join("_")
+        const chatId = [myUserId, user.id].sort() .join("_");
+        const tempId = Date.now().toString();
+        const newMessage: Message = {
+            id: tempId,
+            text: msg,
+            sender:myUserId,
+            timeStamp: new Date().toISOString(),
+            status: "sending",
+            type: "text"
+        }
+        setMessages((prev) => [newMessage, ...prev]);
         const payload = {
+            tempId,
             chatId,
             sender: myUserId,
              receiver: user.id,
@@ -436,14 +448,41 @@ item.type === "file"  && item.file && (
  <View style={[styles.messageBubble,  isMe ? styles.myMessage : styles.theirMessage ]}>
         <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.theirMessage]} > {item.text} </Text>
             </View>
+
+            <View style={{flexDirection: "row", alignItems: "center"}}>
                 <Text style={[
-                    styles.timeStampOut, isMe ? styles.myTime : styles.theirTime
+                    styles.timeStampOut, 
+                    isMe ? styles.myTime : styles.theirTime
                 ]}>
-{new Date(item.timeStamp).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-})}
-    </Text>
+                    {new Date(item.timeStamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    })}
+                </Text>
+                {isMe && (
+                    <View style={{marginLeft: 4}}>
+                        {item.status === "sending" && (
+                            <Icon name="time-outline"  size={12} color= "#999"/>
+                        )}
+
+                        {item.status === "sent" && (
+                            <Icon name="checkmark"  size={12} color= "#999"/>
+                        )}
+
+                           {item.status === "delivered" && (
+                            <Icon name="done-all"  size={12} color= "#999"/>
+                        )}
+
+                           {item.status === "seen" && (
+                            <Icon name="ellipse"  size={12} color= "#2196F3"/>
+                        )}
+
+
+
+                        </View>
+                )}
+            </View>
+           
 </View>         
         );
     };
