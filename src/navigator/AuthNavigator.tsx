@@ -2,6 +2,7 @@ import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
 import Login from "../screens/Login";
 import SignUp from "../screens/SignUp";
+import Prof from "../screens/Prof";
 
 
 const Stack = createNativeStackNavigator();
@@ -15,6 +16,7 @@ export default function AuthNavigator({setIsAuthenticated}: any) {
             </Stack.Screen>
 
             <Stack.Screen name="SignUp" component={SignUp}  />
+            <Stack.Screen  name="Prof"  component={Prof}/>
         </Stack.Navigator>
     );
 }

@@ -22,6 +22,7 @@ import User from "../screens/User";
 import Home from "../screens/Home";
 
 
+
 const Stack = createNativeStackNavigator();
 
 interface AppNavigatorProps {
@@ -32,7 +33,7 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
     return (
        <User>
          <>
-         <Stack.Navigator screenOptions={{headerShown: false}}>
+          <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name="Home">
 {() => (
     <Home setIsAuthenticated={setIsAuthenticated}   />
@@ -56,7 +57,9 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
              <Stack.Screen name="Host" component={Host}   />
                         <Stack.Screen name="Viewer" component={Viewer}   />
          </Stack.Navigator>
-        </>
+         </>
+        
+        
        </User>
     );
 }

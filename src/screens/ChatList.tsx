@@ -4,198 +4,21 @@ import { FlatList, View, TouchableOpacity, StyleSheet, Text,
 import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
-
 import useContact from "../data/useContact";
+import { useEffect, useState, useRef } from "react";
+import { Animated } from "react-native";
+import axios from "axios";
 
+const BASE_URL = "https://tuback-8pr0.onrender.com";
 
-const dummyUsers = [
-    {
-        id: "1", name: "Ken",
-        avatar: "https://drive.google.com/uc?export=view&id=1niTtaBYKNWAvx9FbUtFVmBkgH6n-uxi3",
-        online: true,
-        lastMessage: "Hello, kindly wait till kesho very early in the morning!!",
-        message: [
-             {
-            id: "1-l", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "1-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "2:01 PM"
-       
-    },
-    {
-        id: "2",
-        name: "Reagan",
-        avatar:  "https://drive.google.com/uc?export=view&id=1IdTKppTdsK4_i9lUR1VKOUXujxC6RrsL",
-        online: true,
-          lastMessage: "Hello dear",
-        message: [
-             {
-            id: "2-l", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "2-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "12.27 PM"
-       
-    },
-    {
-        id: "3",
-        name: "Ekombe",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
-        message: [
-             {
-            id: "3-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "3-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "12: 20 PM"
-       
-    },
-    {
-        id: "4",
-        name: "Higal",
-        avatar: "https://drive.google.com/uc?export=view&id=19XRQ062YGtJbptSiwgNXz4uuTARJBe-s",
-        online: true,
-          lastMessage: "Akombe, share the MVP, I wanna take a look at it",
-        message: [
-             {
-            id: "4-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "4-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "9.27 AM"
-       
-    },
-    {
-        id: "5",
-        name: "Kevo",
-        avatar: "https://drive.google.com/uc?export=view&id=19XRQ062YGtJbptSiwgNXz4uuTARJBe-s",
-        online: true,
-          lastMessage: "Kindly, get me posted if you are still showng up tommorow",
-        message: [
-             {
-            id: "5-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "5-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "9.23 AM"
-       
-  
-    },
-     {
-        id: "6",
-        name: "Irene",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Mluhya uko aje, how the going so fur",
-        message: [
-             {
-            id: "6-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "6-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "8:56 AM"
-       
-    },
-     {
-        id: "7",
-        name: "Mum",
-        avatar:  "https://drive.google.com/uc?export=view&id=1IdTKppTdsK4_i9lUR1VKOUXujxC6RrsL",
-        online: true,
-          lastMessage: "Yes Mulembe  Mum, I will call kesho",
-        message: [
-             {
-            id: "7-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "7-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "8:01 AM"
-    },
-       {
-        id: "8",
-        name: "Ekombe",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
-        message: [
-             {
-            id: "8-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "8-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "12: 20 PM"
-       
-    },
-       {
-        id: "9",
-        name: "Ekombe",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
-        message: [
-             {
-            id: "9-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "9-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "12: 20 PM"
-       
-    },
-       {
-        id: "10",
-        name: "Ekombe",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
-        message: [
-             {
-            id: "10-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         {
-            id: "10-2", text: "How is the going so fur", sender: "me", time: "11.27 AM"
-        },
-        ],
-        timeStamp: "12: 20 PM"
-       
-    },
-       {
-        id: "11",
-        name: "Ekombe",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        online: true,
-          lastMessage: "Omwana wefu, mulembe okhukhama nakhwo",
-        message: [
-             {
-            id: "11-1", text: "Yes Pumkin", sender: "Reagan", time: "11.24 AM"
-        },
-         { id: "11-2", text: "How is the going so fur", sender: "me", time: "11.27 AM" },
-        ],
-        timeStamp: "12: 20 PM"  },
-]
-export default function ChatList({search}) {
+export default function ChatList({search, currentUser}) {
+
     const navigation = useNavigation();
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const bounceAnim = useRef(new Animated.Value(0)).current;
     const query = search?.toLowerCase() || "";
     const contacts = useContact();
+    const [conversations, setConversations] = useState([]);
 
     const filteredContacts = contacts.filter((contact) => {
       const fullName =  `${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
@@ -205,14 +28,61 @@ export default function ChatList({search}) {
       );
     });
 
-    const filteredChats = dummyUsers.filter(chat => 
-      chat.name.toLowerCase().includes(query)
+    useEffect(() => {
+    if(currentUser?.id) {
+        fetchConversations();
+    }
+    }, [currentUser])
+
+    useEffect(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        userNativeDriver: true,
+      }).start();
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(bounceAnim, {
+               toValue: -10,
+        duration: 800,
+        userNativeDriver: true,
+          }),
+          Animated.timing(bounceAnim, {
+               toValue: 0,
+        duration: 800,
+        userNativeDriver: true
+          }),
+        ])
+      ).start()
+    }, [])
+const fetchConversations = async () => {
+  try {
+    const res = await axios.get(
+      `${BASE_URL}/messages/conversations/${currentUser.id}`
+    );
+    setConversations(res.data)
+
+  } catch(err) {
+    console.error(err)
+  }
+}
+
+
+    const filteredChats = conversations.filter(chat => 
+      chat.user?.name?.toLowerCase().includes(query)
     );
 
     const mergedData = query.length > 0
     ? [
-       ...filteredChats.map(item => ({...item, type: "chat"})),
+      ...filteredChats.map(item => ({
+        id: item.chatId,
+        chatId: item.chatId,
+        user: item.user,
+        lastMessage: item.lastMessage,
+        type: "chat"
 
+      })),
          ...filteredContacts.map((item) => ({
         id: item.recordID,
         name: `${item.givenName} ${item.familyName || ""}`,
@@ -222,23 +92,37 @@ export default function ChatList({search}) {
        }))
  
     ]
-      : dummyUsers.map(item => ({...item, type: "chat"}))
+      : conversations.map(item => ({
+        id: item.chatId,
+        chatId:  item.chatId,
+        user: item.user,
+        lastMessage: item.lastMessage,
+        type: "chat"
+
+      }))
     return(
 <View style={{flex: 1}}>
 
   <FlatList
     data={mergedData}
-    keyExtractor={(item) => item.id}
+    keyExtractor={(item) => item.type === "chat"? item.chatId : item.id}
     renderItem={({ item }) => {
 
       if (item.type === "chat")  {
         return (
-          <ChatItem user={item}
-          onPressRow={() => navigation.navigate("Chats", {user: item})}
-          onPressAvatar={() => navigation.navigate("Profile", {user: item})}
+          <ChatItem 
+          user={item.user}
+          lastMessage={item.lastMessage}
+
+          onPressRow={() => navigation.navigate(
+            "Chats",
+             {user: item.user,
+                 chatId: item.chatId,
+             })
+            }
+          onPressAvatar={() => navigation.navigate("Profile", {user: item.user})}
           />
-        )
-      }
+        )}
 
       return(
         <TouchableOpacity 
@@ -251,11 +135,11 @@ export default function ChatList({search}) {
             avatar: item.avatar,
             messages: [],
           },
-          isNewChat: true
+          isNewChat: true,
         })}>
           
           <View style={styles.avatarContact}>
-<Text style={styles.avaText}>
+<Text >
   {item.name}
 </Text>
           </View>
@@ -263,7 +147,30 @@ export default function ChatList({search}) {
       )
 
     }}
-    contentContainerStyle={{ paddingBottom: 150 }}
+ ListEmptyComponent={() => (
+<Animated.View
+style={[styles.emptyPort, {opacity: fadeAnim}]}>
+  <Animated.Text  style={[styles.emoji, 
+    { transform: [{translateY: bounceAnim}],
+  },
+  ]}>
+    🤝
+  </Animated.Text>
+
+<Text style={styles.emptyTitles}>
+      Start Chat With TuChat!!
+    </Text>
+    <Text style={styles.emptyTitle}>
+      Tap the + button to start a chat with friends!!
+    </Text>
+
+
+</Animated.View>
+
+    
+
+ )}
+    contentContainerStyle={{paddingBottom: 150, flexGrow: 1 }}
     showsVerticalScrollIndicator={true}
     persistentScrollbar={true}
   />
@@ -297,7 +204,25 @@ const styles = StyleSheet.create({
       width: 60, height: 60, borderRadius: 30, justifyContent: "center",
       alignItems: "center", marginRight: 10, 
   backgroundColor: "#0a9df1"
-    }
+    },
+    emptyPort: {
+      justifyContent: "center", alignItems: "center", paddingHorizontal: 20, flex: 1
+    },
+    emptyTitle: {
+      color: "#000",
+      fontSize: 25, fontWeight: "bold",
+      textAlign: "center"
+    },
+    emoji: {
+      fontSize: 100,
+      marginBottom: 5
+    },
+      emptyTitles: {
+      color: "#0a9df1",
+      fontSize: 28, fontWeight: "bold",
+      textAlign: "center"
+      
+    },
    
 })
 

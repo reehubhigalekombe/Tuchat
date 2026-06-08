@@ -34,7 +34,7 @@ currentUser?: {id: string}
 ) => {
 try {
   if(!currentUser?.id) throw new Error ("User not found");
- await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser});
+ await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser.id});
  ws?.close();
  await AsyncStorage.clear();
   setIsAuthenticated(false);
@@ -74,7 +74,7 @@ onRequestClose={() => setMenuVisible(false)}
 </View>
 </TouchableOpacity>
 
-   <TouchableOpacity onPress={() =>  {setMenuVisicdble(false); navigation.navigate("Settings" as never);}}>
+   <TouchableOpacity onPress={() =>  {setMenuVisible(false); navigation.navigate("Settings" as never);}}>
        <View style={styles.settingIcon}>
           <Icon  name="settings-outline" size={22} color="white" />
 <Text style={styles.menuStaff}>Settings</Text>

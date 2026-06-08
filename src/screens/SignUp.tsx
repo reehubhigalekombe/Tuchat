@@ -5,7 +5,7 @@ import { View, StyleSheet, TextInput, TouchableOpacity,
     Alert, Text } from "react-native";
 import axios from "axios";
 
-const BASE_URLL = "https://tuback-8pr0.onrender.com";
+const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 export default function SignUp() {
     const navigation = useNavigation();
@@ -17,9 +17,9 @@ export default function SignUp() {
     const handleSignUp = async () => {
         if(!name || !handle || !phone || !password) return Alert.alert(" All fields are required to be filled");
         try {
-            const res = await axios.post(`${BASE_URLL}/auth/register`, {name, handle, phone,  password});
+            const res = await axios.post(`${BASE_URL}/auth/register`, {name, handle, phone,  password});
             Alert.alert(`Woow, user account has been created, ${res.data.user.handle}`);
-            navigation.navigate("Prof", {
+            navigation.navigate("Login", {
                 userId: res.data.user._id
             });
         }catch (err: any) {
