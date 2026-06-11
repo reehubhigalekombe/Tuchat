@@ -1,11 +1,12 @@
-import React, {useState} from "react";
+import React, {useState, useContext} from "react";
 import axios from "axios";
-import * as Keychain from "react-native-keychain";
 import { useNavigation } from "@react-navigation/native";
 import { View,Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
     TextInput, TouchableOpacity, Alert, Text } from "react-native";
+import { UserContext } from "../context/UserContext";
+import * as KeyChain from "react-native-keychain"
 
-const BASE_URLL = "https://tuback-8pr0.onrender.com"
+const BASE_URL = "https://tuback-8pr0.onrender.com"
 
 interface LoginProps {
     setIsAuthenticated: (value: boolean) => void
@@ -15,13 +16,22 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
     const [handle, setHandle] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const userContext = useContext(UserContext);
+    if(!userContext) {
+        throw new Error("UserContext Must be inside the Provider");
+    }
+    const {setCurrentUser} = userContext
 
      const handleLogin = async () => {
         if(!handle || !password) return Alert.alert(" All fields are required to be filled");
         try {
             setLoading(true)
-            const res = await axios.post(`${BASE_URLL}/auth/login`, { handle, password});
-            await Keychain.setGenericPassword("auth", res.data.token);
+            const res = await axios.post(`${BASE_URL}/auth/login`, { handle, password});
+            const user =  res.data.user;
+            const token = res.data.token
+
+            setCurrentUser(user);
+            await KeyChain.setGenericPassword(user.handle, token)
             Alert.alert(`Woow, Login Sucess, ${res.data.user.handle}`);
 
             setIsAuthenticated(true)
@@ -64,7 +74,7 @@ disabled={!handle || !password || loading}>
 <Text style={{textAlign: "center", fontSize: 18, marginTop: 10, color: "#aaa"}}>
         Don't' have an Account?{""}     
 </Text>
-<Text style={{ color: "#0A9DF1", fontSize: 25, }}onPress={() =>navigation.navigate("SignUp") }>
+<Text style={{ color: "#0A9DF1", fontSize: 25 }}onPress={() => navigation.navigate("SignUp") }>
 Sign In
 </Text>
     </View>

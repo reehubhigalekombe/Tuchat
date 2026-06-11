@@ -5,7 +5,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext } from "react";
-import { UserContext } from "../screens/User";
+import { UserContext} from "../context/UserContext";
+import * as Keychain from "react-native-keychain"
 
 type Props = {
   activeTab: string;
@@ -33,12 +34,16 @@ ws?: WebSocket | null,
 currentUser?: {id: string}
 ) => {
 try {
+  console.log("Logging out the current User:", currentUser);
+
   if(!currentUser?.id) throw new Error ("User not found");
  await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser.id});
  ws?.close();
+
+ await Keychain.resetGenericPassword();
  await AsyncStorage.clear();
   setIsAuthenticated(false);
-   navigation.navigate("Login")
+
 }catch(err) {
   console.error("Sorry logout Failed", err)
 }

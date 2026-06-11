@@ -38,20 +38,20 @@ export default function ChatList({search, currentUser}) {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 800,
-        userNativeDriver: true,
+        useNativeDriver: true,
       }).start();
 
       Animated.loop(
         Animated.sequence([
           Animated.timing(bounceAnim, {
-               toValue: -10,
+               toValue: -15,
         duration: 800,
-        userNativeDriver: true,
+        useNativeDriver: true,
           }),
           Animated.timing(bounceAnim, {
                toValue: 0,
         duration: 800,
-        userNativeDriver: true
+        useNativeDriver: true
           }),
         ])
       ).start()
@@ -60,7 +60,8 @@ const fetchConversations = async () => {
   try {
     const res = await axios.get(
       `${BASE_URL}/messages/conversations/${currentUser.id}`
-    );
+    );  
+
     setConversations(res.data)
 
   } catch(err) {
@@ -163,12 +164,7 @@ style={[styles.emptyPort, {opacity: fadeAnim}]}>
     <Text style={styles.emptyTitle}>
       Tap the + button to start a chat with friends!!
     </Text>
-
-
 </Animated.View>
-
-    
-
  )}
     contentContainerStyle={{paddingBottom: 150, flexGrow: 1 }}
     showsVerticalScrollIndicator={true}
@@ -182,9 +178,7 @@ style={[styles.emptyPort, {opacity: fadeAnim}]}>
       <Icon name="add" size={26} color="white" />
     </View>
   </TouchableOpacity>
-
 </View>
-
     )
 }
 const styles = StyleSheet.create({
@@ -220,10 +214,8 @@ const styles = StyleSheet.create({
       emptyTitles: {
       color: "#0a9df1",
       fontSize: 28, fontWeight: "bold",
-      textAlign: "center"
-      
+      textAlign: "center",
     },
-   
 })
 
 

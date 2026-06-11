@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { View,  Text, StyleSheet, TouchableOpacity, Image, FlatList, Platform, KeyboardAvoidingView, Alert,Share, Linking} from "react-native";
 import ImageViewing from"react-native-image-viewing";
 import { SafeAreaView } from "react-native-safe-area-context";
 import EmptyChat from "../component/EmptyChat";import Emoji from "../component/Emoji";
 import axios  from "axios";
+import { UserContext } from "../context/UserContext";
 import MessageInput from "../component/MessageInput";
 import Icon  from "react-native-vector-icons/Ionicons";
 import { useRoute } from "@react-navigation/native";
@@ -11,6 +12,22 @@ import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
 import {AnimatedCircularProgress} from "react-native-circular-progress"
 import AudioRecorderPlayer from "react-native-audio-recorder-player";
+
+const BASE_URL = "https://tuback-8pr0.onrender.com";
+const WS_URL = "wss://tuback-8pr0.onrender.com";
+
+   type Message = { id: string; text: string;
+    sender?: string, timeStamp: string, 
+    status?: "sending" | "sent" | "delivered" | "seen",
+    type? : "text" | "image" | "audio" | "video" | "file";  file?: any
+};
+
+
+type RouteParams ={
+    user: {id: string, name: string, avatar: string,  online: boolean,
+        lastMessage? :string, message? : Message[], timeStamp? : string
+    };
+};
 
 const getInitials = (name: string) => {
   if (!name) return "";
@@ -28,31 +45,20 @@ const getInitials = (name: string) => {
 };
 
 export default function Chats({search}) {
-
-    type Message = { id: string; text: string;
-    sender?: string, timeStamp: string, 
-    status?: "sending" | "sent" | "delivered" | "seen",
-    type? : "text" | "image" | "audio" | "video" | "file";  file?: any
-};
-
-type RouteParams ={
-    user: {id: string, name: string, avatar: string,  online: boolean,
-        lastMessage? :string, message? : Message[], timeStamp? : string
-    };
-};
-
-  const route = useRoute();
-    const chatId = `1_${user?.id}`
+    const route = useRoute();
     const navigation = useNavigation();
-    const audioPlayer = new AudioRecorderPlayer()
+    const audioPlayer = new AudioRecorderPlayer();
+    
+    const userContext = useContext(UserContext);
+    if (!userContext) {
+        throw new Error ("UserContext nust be inside the UserProvider")
+    }
+    const{currentUser} = userContext
     const user  = (route.params as RouteParams | undefined )?.user;
-
+    
+    
     const [messages, setMessages] = useState<Message[]>([]);
-    useEffect(() => {
-        if(user?.message) {
-            setMessages(user.message)
-        }
-    }, [user])
+    
     const[isOnline, setIsOnline] = useState(true)
     const[input, setInput] = useState("")
     const[showEmoji, setShowEmoji] = useState(false);
@@ -64,9 +70,15 @@ type RouteParams ={
     const[currentFileName, setCurrentFileName] = useState("")
     const ws = useRef<WebSocket | null>(null);
 
-const BASE_URL = "https://tuback-8pr0.onrender.com";
-const WS_URL = "wss://tuback-8pr0.onrender.com";
+    if(!user || !currentUser) return null;
+    const chatId = [currentUser.id, user.id].sort().join("_");
 
+    useEffect(() => {
+        if(user?.message) {
+            setMessages(user.message)
+        }
+    }, [user])
+    
 useEffect(()  => {
     const parent = navigation.getParent();
     parent?.setOptions({
@@ -252,11 +264,7 @@ try { await audioPlayer.startPlayer(uri);
         };
  
  useEffect(() => {
-    if(!user?.id)  {
-        return;
-    }
-    const myUSerId = "me";
-    const chatId = [myUSerId, user.id].sort().join("_");
+    if(!user?.id || !currentUser?.id) return;
 
     const fetchMessages = async () => {
         try{
@@ -282,12 +290,10 @@ try { await audioPlayer.startPlayer(uri);
   
  ws.current = new WebSocket(WS_URL);
 ws.current.onopen = () => {
-  console.log("WebSocket connected successfully");
-  
   ws.current?.send(
     JSON.stringify({
     type: "join", 
-    userId: myUSerId,
+    userId: currentUser.id,
     chatId,
   })
 );
@@ -316,22 +322,19 @@ ws.current.onmessage = (event) => {
                ws.current.onerror = (err) =>
                 console.error("WebSocket error", err);
 
-               ws.current.onclose = () =>
-                console.log("WebSocket has been closed");
                return () =>{
                 ws.current?.close()
-               }
- }, [user?.id, ]);
+               };
+ }, [chatId]);
 
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
-        const myUserId = "me";
-        const chatId = [myUserId, user.id].sort() .join("_");
         const tempId = Date.now().toString();
+
         const newMessage: Message = {
             id: tempId,
             text: msg,
-            sender:myUserId,
+            sender: currentUser.id,
             timeStamp: new Date().toISOString(),
             status: "sending",
             type: "text"
@@ -340,7 +343,7 @@ ws.current.onmessage = (event) => {
         const payload = {
             tempId,
             chatId,
-            sender: myUserId,
+            sender: currentUser.id,
              receiver: user.id,
             message: msg,
             type: "text"

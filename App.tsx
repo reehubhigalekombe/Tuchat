@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import AppNavigator from "./src/navigator/AppNavigator";
 import AuthNavigator from "./src/navigator/AuthNavigator";
+import UserProvider from "./src/context/UserContext"
 import * as Keychain from "react-native-keychain"
 
 export default function App() {
@@ -23,7 +24,8 @@ export default function App() {
     checkLogin();
   }, [])
   return (
-    <NavigationContainer>
+    <UserProvider>
+      <NavigationContainer>
       {
         isAuthenticated ? (
           <AppNavigator setIsAuthenticated={setIsAuthenticated}/>
@@ -33,5 +35,6 @@ export default function App() {
       }
 
     </NavigationContainer>
+    </UserProvider>
   )
 }

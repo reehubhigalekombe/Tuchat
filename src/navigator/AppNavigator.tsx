@@ -5,7 +5,6 @@ import Calls from "../screens/Calls";
 import CameraScr from "../screens/CameraScr";
 import ChatList from "../screens/ChatList";
 import Status from "../screens/Status";
-
 import Profile from "../screens/Profile";
 import ZoomImage from "../screens/ZoomImage";
 import AddCall from "../screens/AddCall";
@@ -18,10 +17,7 @@ import Link from "../screens/Link";
 import Live from "../screens/Live";
 import Host from "../screens/Host";
 import Viewer from "../screens/Viewer";
-import User from "../screens/User";
 import Home from "../screens/Home";
-
-
 
 const Stack = createNativeStackNavigator();
 
@@ -31,8 +27,7 @@ interface AppNavigatorProps {
 export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
 
     return (
-       <User>
-         <>
+         
           <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name="Home">
 {() => (
@@ -57,9 +52,5 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
              <Stack.Screen name="Host" component={Host}   />
                         <Stack.Screen name="Viewer" component={Viewer}   />
          </Stack.Navigator>
-         </>
-        
-        
-       </User>
     );
 }

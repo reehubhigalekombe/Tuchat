@@ -4,7 +4,7 @@ import { TouchableWithoutFeedback } from "react-native";
 import { View, Image, ActivityIndicator,  Modal, TouchableOpacity, Text, ScrollView, StyleSheet, Alert} from "react-native";
 import Icon  from "react-native-vector-icons/Ionicons";
 import { launchImageLibrary, launchCamera } from "react-native-image-picker";
-import { UserContext } from "./User";
+import { UserContext } from "../context/UserContext";
 
 export default function OwnerProfile() {
 

@@ -19,7 +19,7 @@ export default function SignUp() {
         try {
             const res = await axios.post(`${BASE_URL}/auth/register`, {name, handle, phone,  password});
             Alert.alert(`Woow, user account has been created, ${res.data.user.handle}`);
-            navigation.navigate("Login", {
+            navigation.navigate("Prof", {
                 userId: res.data.user._id
             });
         }catch (err: any) {

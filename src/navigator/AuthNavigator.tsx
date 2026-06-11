@@ -4,7 +4,6 @@ import Login from "../screens/Login";
 import SignUp from "../screens/SignUp";
 import Prof from "../screens/Prof";
 
-
 const Stack = createNativeStackNavigator();
 
 export default function AuthNavigator({setIsAuthenticated}: any) {
