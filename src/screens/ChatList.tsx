@@ -17,8 +17,9 @@ export default function ChatList({search, currentUser}) {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const bounceAnim = useRef(new Animated.Value(0)).current;
     const query = search?.toLowerCase() || "";
-    const contacts = useContact();
+    const contacts = useContact() || [];
     const [conversations, setConversations] = useState([]);
+    console.log("ChatList currentUser: ", currentUser)
 
     const filteredContacts = contacts.filter((contact) => {
       const fullName =  `${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
@@ -134,7 +135,7 @@ const fetchConversations = async () => {
             name: item.name,
             phoneNumber: item.phoneNumber,
             avatar: item.avatar,
-            messages: [],
+            message: [],
           },
           isNewChat: true,
         })}>
@@ -184,7 +185,7 @@ style={[styles.emptyPort, {opacity: fadeAnim}]}>
 const styles = StyleSheet.create({
         float: {
         position: "absolute", bottom: 20, right: 15, backgroundColor: "#1f2020ff",    elevation: 2,
-        zIndex: 2,
+        zIndex: 999,
         height: 70, width: 70, borderRadius: 35, alignItems: "center", justifyContent: "center"
     },
     chatText: {

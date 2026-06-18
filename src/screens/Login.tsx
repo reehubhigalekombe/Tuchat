@@ -28,7 +28,8 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
             setLoading(true)
             const res = await axios.post(`${BASE_URL}/auth/login`, { handle, password});
             const user =  res.data.user;
-            const token = res.data.token
+            const token = res.data.token;
+            console.log("Login User: ", user)
 
             setCurrentUser(user);
             await KeyChain.setGenericPassword(user.handle, token)

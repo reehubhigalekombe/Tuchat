@@ -22,7 +22,7 @@ export default function AddCall() {
   const contacts = useContact();
    const filteredContacts = contacts.filter((contact) => {
     const fullName = 
-  `  ${contacts.givenName} ${contacts.familyName || ""}`.toLowerCase();
+  `  ${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
   return fullName.includes(search.toLowerCase())
    });
 
@@ -34,7 +34,7 @@ const handleContactSelect = (contact: Contact) => {
             name: `${contact.givenName} ${contact.familyName || ""}`,
             phoneNumber: 
             contact.phoneNumbers?.[0]?.number || "nNo Number",
-            avatar: thumbnailPath || null,
+            avatar: contact.thumbnailPath || null,
             messages: [],
         },
         isNewChat: true,

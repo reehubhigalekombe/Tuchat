@@ -4,7 +4,7 @@ type CurrentUser = {
     name: string,
     handle: string,
     phone: string,
-    avatar: string,
+    avatar?: string,
 };
 type UserContextType = {
     currentUser: CurrentUser | null;

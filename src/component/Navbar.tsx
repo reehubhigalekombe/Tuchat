@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Image, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useContext } from "react";
 import { UserContext} from "../context/UserContext";
 import * as Keychain from "react-native-keychain"
 
@@ -12,7 +11,6 @@ type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   setIsAuthenticated: (v: boolean) => void;
-  currentUser: {id: string; name: string; handle: string},
   search: string
   setSearch: (v: string) => void
 
@@ -20,33 +18,30 @@ type Props = {
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 export default function Navbar({activeTab, setActiveTab, 
-  setIsAuthenticated,
-   search, setSearch, currentUser
-  }: Props) {
+  setIsAuthenticated, search, setSearch }: Props) {
 const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
-  const {avatar} = useContext(UserContext)!
+  const userContext  = useContext(UserContext)
+  if(!userContext) {
+    throw new Error ("UserContext must be used inside UserProvider");
+  }
+  const {currentUser, setCurrentUser} = userContext
 
-const handleLogOut = async (
-  setIsAuthenticated: (v: boolean) => void,
-navigation: any, 
-ws?: WebSocket | null,
-currentUser?: {id: string}
-) => {
-try {
-  console.log("Logging out the current User:", currentUser);
+const handleLogOut = async () => {
+  try {
+    console.log("Context User: ", currentUser);
+    if(!currentUser?.id) {
+      throw new Error("User not found")
+    }
+  await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser.id});
+  await Keychain.resetGenericPassword();
+  await AsyncStorage.clear();
+  setCurrentUser(null)
+    setIsAuthenticated(false);
 
-  if(!currentUser?.id) throw new Error ("User not found");
- await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser.id});
- ws?.close();
-
- await Keychain.resetGenericPassword();
- await AsyncStorage.clear();
-  setIsAuthenticated(false);
-
-}catch(err) {
-  console.error("Sorry logout Failed", err)
-}
+  }catch(err) {
+    console.log("Log-out failed")
+  }
 }
   return(
 <View style={styles.port}>
@@ -100,9 +95,8 @@ onRequestClose={() => setMenuVisible(false)}
         </View>
     </TouchableOpacity>
 
-    <TouchableOpacity onPress={() => 
-    handleLogOut(setIsAuthenticated, navigation, undefined, currentUser)
-  }>
+    <TouchableOpacity onPress={handleLogOut}
+  >
         <View style={styles.settingIcon}>
                <Icon  name="power-outline" size={22} color="white" />
  <Text style={styles.menuStaff}>Log-Out</Text>
@@ -126,11 +120,12 @@ onPress={() => {
 <View style={styles.search}>
   <TextInput 
 placeholder="Search....."
+
 placeholderTextColor={"#fff"}
 value={search}
 onChangeText={setSearch}
 onFocus={() => setActiveTab("Search")}
-returnKeyType="Search"
+returnKeyType="search"
 style={styles.searchBar}
 onBlur={() => {
   if(search.length === 0) {
@@ -159,7 +154,7 @@ underlineColorAndroid="transparent"
 }}
 style={styles.tabItem}>
 
-<Image source={{uri: avatar}} style={[styles.profAvatar,
+<Image source={{uri: currentUser?.avatar ||  "https://via.placeholder.com/150"}} style={[styles.profAvatar,
   activeTab === "Profile" && styles.activeProfile
 ]}   />
 </TouchableOpacity>

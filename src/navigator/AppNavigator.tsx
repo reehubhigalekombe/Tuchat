@@ -18,6 +18,7 @@ import Live from "../screens/Live";
 import Host from "../screens/Host";
 import Viewer from "../screens/Viewer";
 import Home from "../screens/Home";
+import Chats from "../screens/Chats";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +39,7 @@ export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
     <Stack.Screen name="Camera" component={CameraScr} />
     <Stack.Screen  name="StatusView" component={StatusView}/>
       <Stack.Screen name="Calls" component={Calls} />
+            <Stack.Screen name="Chats" component={Chats} />
       <Stack.Screen name="Status" component={Status} />
      <Stack.Screen name="ChatList" component={ChatList} />
         <Stack.Screen name="Profile" component={Profile} />
