@@ -11,30 +11,71 @@ import axios from "axios";
 
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
-export default function ChatList({search, currentUser}) {
+type RegisteredUser = {
+  _id: string;
+  name: string;
+  handle: string;
+  phone: string;
+  avatar?: string;
+  isOnline?: boolean;
+};
+type CurrentUser =  {
+  _id: string;
+} | null;
+
+type Props = {
+  search: string; 
+  currentUser: CurrentUser;
+}
+
+type Conversations = {
+  chatId: string;
+  user: {
+    _id: string;
+    name: string,
+    avatar?: string,
+  };
+  lastMessage: string
+}
+
+type ChatItemType = |
+{ type: "chat";  id: string; chatId: string; user: any; lastMessage: string} |
+{
+  type: "contact"; id: string; name: string; avatar?:string; online?: boolean
+}
+export default function ChatList({search, currentUser,}: Props) {
 
     const navigation = useNavigation();
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const bounceAnim = useRef(new Animated.Value(0)).current;
     const query = search?.toLowerCase() || "";
-    const contacts = useContact() || [];
-    const [conversations, setConversations] = useState([]);
-    console.log("ChatList currentUser: ", currentUser)
+    const {contacts=[], registeredUsers = [],} = useContact();
+    const users: RegisteredUser[] = registeredUsers
+    
+    const [conversations, setConversations] = useState<Conversations[]>([]);
+    console.log("ChatList currentUser: ", currentUser);
 
-    const filteredContacts = contacts.filter((contact) => {
-      const fullName =  `${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
-      const phone = contact.phoneNumbers[0]?.number || "";
-      return (
-        fullName.includes(query) || phone.includes(query)
-      );
-    });
+    const normalizePhone = (phone: string) => {
+      return phone.replace(/\D/g, "");
+    }
+
+    const fetchConversations = async () => {
+  try {
+    if(!currentUser?._id) return;
+    const res = await axios.get(
+      `${BASE_URL}/messages/conversations/${currentUser._id}`
+    );  
+    setConversations(res.data)
+  } catch(err) {
+    console.error(err)
+  }
+};
 
     useEffect(() => {
-    if(currentUser?.id) {
         fetchConversations();
-    }
-    }, [currentUser])
+    }, [currentUser?._id])
 
+    
     useEffect(() => {
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -57,42 +98,55 @@ export default function ChatList({search, currentUser}) {
         ])
       ).start()
     }, [])
-const fetchConversations = async () => {
-  try {
-    const res = await axios.get(
-      `${BASE_URL}/messages/conversations/${currentUser.id}`
-    );  
 
-    setConversations(res.data)
-
-  } catch(err) {
-    console.error(err)
-  }
-}
-
+    const filteredContacts = contacts.filter((contact) => {
+      const phone = normalizePhone(
+        contact.phoneNumbers[0]?.number || ""
+      );
+      const fullName =  `${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
+      const isRegistered = users.find(
+        user => normalizePhone(user.phone) === phone
+      );
+      return isRegistered && (
+        fullName.includes(query) || phone.includes(query)
+      );
+    });
 
     const filteredChats = conversations.filter(chat => 
       chat.user?.name?.toLowerCase().includes(query)
     );
 
-    const mergedData = query.length > 0
+    const mergedData: ChatItemType[] = query.length > 0
     ? [
       ...filteredChats.map(item => ({
         id: item.chatId,
         chatId: item.chatId,
         user: item.user,
         lastMessage: item.lastMessage,
-        type: "chat"
-
+        type: "chat" as const,
       })),
-         ...filteredContacts.map((item) => ({
-        id: item.recordID,
-        name: `${item.givenName} ${item.familyName || ""}`,
-        phoneNumber: item.phoneNumbers[0]?.number || "",
-        avatar: item.thumbnailPath || null,
-        type: "contact"
-       }))
- 
+         ...filteredContacts.map(contact=> {
+          const matchUser = registeredUsers.find(
+            (user: RegisteredUser)=> 
+              normalizePhone(user.phone) === 
+            normalizePhone( contact.phoneNumbers[0]?.number || "")
+          );
+          if(!matchUser) return null;
+          return {
+           id: matchUser._id,
+            name: matchUser.name,
+            avatar: matchUser.avatar,
+            online: matchUser.isOnline,
+            type:  "contact" as const,
+          };
+         })
+         .filter(
+          (item
+          ) : item is Extract <
+          ChatItemType, 
+          {type: "contact"}
+          >  => item !== null
+         ),
     ]
       : conversations.map(item => ({
         id: item.chatId,
@@ -107,7 +161,7 @@ const fetchConversations = async () => {
 
   <FlatList
     data={mergedData}
-    keyExtractor={(item) => item.type === "chat"? item.chatId : item.id}
+    keyExtractor={(item) => item.id}
     renderItem={({ item }) => {
 
       if (item.type === "chat")  {
@@ -115,25 +169,27 @@ const fetchConversations = async () => {
           <ChatItem 
           user={item.user}
           lastMessage={item.lastMessage}
-
           onPressRow={() => navigation.navigate(
-            "Chats",
+            "Chats" as never,
              {user: item.user,
                  chatId: item.chatId,
-             })
+             } as never
+            )
             }
-          onPressAvatar={() => navigation.navigate("Profile", {user: item.user})}
+          onPressAvatar={() => navigation.navigate("Profile" as never, 
+            {
+              user: item.user,
+            } as never)}
           />
         )}
 
       return(
         <TouchableOpacity 
         style={styles.myContact}
-        onPress={() => navigation.navigate("Chats", {
+        onPress={() => navigation.navigate("Chats" as never, {
           user: {
             id: item.id,
             name: item.name,
-            phoneNumber: item.phoneNumber,
             avatar: item.avatar,
             message: [],
           },
@@ -142,9 +198,17 @@ const fetchConversations = async () => {
           
           <View style={styles.avatarContact}>
 <Text >
-  {item.name}
+  {item.name
+  .split(" ")
+  .map(n => n[0]
+  )
+  .join("")
+  .toUpperCase()}
 </Text>
           </View>
+          <Text>
+            {item.name}
+          </Text>
         </TouchableOpacity>
       )
 

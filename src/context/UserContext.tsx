@@ -1,6 +1,6 @@
 import React , {ReactNode, createContext, useState}from "react";
 type CurrentUser = {
-    id: string,
+    _id: string,
     name: string,
     handle: string,
     phone: string,

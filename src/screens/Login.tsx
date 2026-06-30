@@ -79,9 +79,6 @@ disabled={!handle || !password || loading}>
 Sign In
 </Text>
     </View>
-   
-
-
 </KeyboardAvoidingView>
     )
 }

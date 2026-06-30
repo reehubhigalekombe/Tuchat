@@ -1,16 +1,13 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
-import { View,  Text, StyleSheet, TouchableOpacity, Image, FlatList, Platform, KeyboardAvoidingView, Alert,Share, Linking} from "react-native";
-import ImageViewing from"react-native-image-viewing";
+import { View,  Text, StyleSheet, TouchableOpacity, Image, FlatList, Platform, KeyboardAvoidingView, } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import EmptyChat from "../component/EmptyChat";import Emoji from "../component/Emoji";
+import EmptyChat from "../component/EmptyChat";
 import axios  from "axios";
 import MessageInput from "../component/MessageInput";
 import Icon  from "react-native-vector-icons/Ionicons";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
-import {AnimatedCircularProgress} from "react-native-circular-progress"
-import AudioRecorderPlayer from "react-native-audio-recorder-player";
 import { UserContext } from "../context/UserContext";
 
 const getInitials = (name: string) => {
@@ -18,21 +15,20 @@ const getInitials = (name: string) => {
 
   const parts = name.trim().split(" ");
 
-  if (parts.length === 1) {
-    return parts[0].charAt(0).toUpperCase();
-  }
+  if (parts.length === 1) {return parts[0].charAt(0).toUpperCase();}
 
   return (
     parts[0].charAt(0).toUpperCase() +
-    parts[1].charAt(0).toUpperCase()
-  );
+    parts[1].charAt(0).toUpperCase() );
 };
 
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 const WS_URL = "wss://tuback-8pr0.onrender.com";
 
-
-export default function Chats({search}) {
+type Prop = {
+    search: string;
+}
+export default function Chats({search}: Prop) {
 
     type Message = { id: string; text: string;
     sender?: string, timeStamp: string, 
@@ -42,21 +38,18 @@ export default function Chats({search}) {
 
 type RouteParams ={
     user: {id: string, name: string, avatar: string,  online: boolean,
-        lastMessage? :string, message? : Message[], timeStamp? : string
-    };
+        lastMessage? :string, message? : Message[], timeStamp? : string  };
 };
 
     const route = useRoute();
     const navigation = useNavigation();
-  
-    const audioPlayer = new AudioRecorderPlayer();
+
     const user  = (route.params as RouteParams | undefined )?.user;
     const userContext = useContext(UserContext);
     if(!userContext) {
         throw new Error ("{UserContext must be inside UserPrtovider}")
     }
     const{currentUser} = userContext
-
 
     const [messages, setMessages] = useState<Message[]>([]);
     useEffect(() => {
@@ -65,204 +58,22 @@ type RouteParams ={
         }
     }, [user])
     const[isOnline, setIsOnline] = useState(true)
-    const[input, setInput] = useState("")
-    const[showEmoji, setShowEmoji] = useState(false);
-    const [isImageViewVisible, setIsImageViewVisible] = useState(false);
-    const[currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [imagesForViewing, setImagesForViewing] = useState<any[]>([]);
-    const [isPDFViewerVisible, setIsPDFViewerVisible] = useState(false);
-    const [currentPDFUrl, setCurrentPDFUrl] = useState("");
-    const[currentFileName, setCurrentFileName] = useState("")
+
     const ws = useRef<WebSocket | null>(null);
-
     const chatId = currentUser?.id && user?.id?
-     [currentUser?.id, user.id].sort().join("_") : "";
-
+  [currentUser?.id, user.id].sort().join("_") : "";
 
 useEffect(()  => {
     const parent = navigation.getParent();
     parent?.setOptions({
-        tabBarStyle: {display: "none",
-
-        },
+        tabBarStyle: {display: "none",},
     });
     return () => {
         parent?.setOptions({
-            tabBarStyle: {
-                backgroundColor: "#000",
-                height: 80,
-                paddingBottom: 8,
-                paddingTop: 8
-            },
-        })
-    }
+            tabBarStyle: {  backgroundColor: "#000",  height: 80,  paddingBottom: 8, paddingTop: 8 },
+        }) }
 }, [navigation])
-        const handlePlayAudio = async (uri: string) => {
-try { await audioPlayer.startPlayer(uri);
-    audioPlayer.addPlayBackListener((e) => {
-        if(e.currentPosition >= e.duration){
-            audioPlayer.stopPlayer();
-            audioPlayer.removePlayBackListener();
-        }
-    });
-
-}catch(err) {
-    console.log("Audio play error:", err);
-    Alert.alert("Error", "Could not Play audio")
-}
-        }
-        const handleImagePress = (imageUri: string) => {
-        const allImages = messages
-        .filter(msg => msg.type === "image" && msg.file)
-        .map(msg => ({uri: msg.file.uri}))
-        const imageIndex = allImages.findIndex(img => img.uri === imageUri);
         
-        if(imageIndex !== -1) {
-            setImagesForViewing(allImages);
-            setCurrentImageIndex(imageIndex);
-            setIsImageViewVisible(true)
-        }};
-
-    const handleVideoPress = async (file: any) => {
-        try {
-            const supported = await Linking.canOpenURL(file.uri);
-            if(supported) {
-                await Linking.openURL(file.uri);
-            } else {
-                Alert.alert("Video Playback",
-                `Sorry, Cannot play: ${file.name}\n\nYou can:\n1. Download and play\n2. Share the Video`,
-                [{
-                    text: "Cancel", style: "cancel"},
-                    {text: "Share", onPress: () => shareFile(file)}
-                ] ); 
-            }
-
-        }catch(error) {
-            console.log("Error while playing Video:", error);
-            Alert.alert("Error", "Video could not be played")
-    }}
-
- const handleDocumentPress = async(file: any) => {
-                    const fileExtension = file.name?.split(".").pop()?.toLowerCase() || "";
-                    if(fileExtension === "pdf") {
-                        setCurrentPDFUrl(file.uri);
-                        setCurrentFileName(file.name);
-                        setIsPDFViewerVisible(true);
-                          return;
-                    };
-                    try {
-                        const supported = await Linking.canOpenURL(file.uri);
-                        if (supported) {
-                            await Linking.openURL(file.uri)
-                        } else {
-                            Alert.alert(
-                                "Open Document", 
-                                ` Sorry Could not open: ${file.name}\n\nFile type: ${file.type || "Unknown"}`,
-                                [
-                                    {text: "Cancel", style: "cancel"},
-                                    {text: "Share File",
-                                        onPress: () => shareFile(file)
-                                    },
-                                    {text: "File Info", onPress: () => showFileInfo(file)},
-                                    {text: "Download", onPress: () => downloadFile(file)}
-                                ]
-                            ); }
-                    }catch(error) {
-                        console.error("Error occured on opening Document:", error);
-                        Alert.alert("Error", "Document could not be Opened")
-                    } };
-                const shareFile = async (file: any) => {
-                    try {
-                        await Share.share({
-                            title: `Share ${file.name}`,
-                            message: `Kindly check this file: ${file.name}`,
-                            url: file.uri,
-                        })
-                    }catch(error) {
-                        console.error("Error occured while sharing file:", error);
-                        Alert.alert( "Error", "Could not share the file")
-                    }};
-
-                const showFileInfo = (file: any) => {
-                    const fileSize = file.size ?  `Size ${(file.size / 1024 / 1024).toFixed
-                        (2)
-                    }MB` : "Size Unknown";
-                    const fileType = file.type ? `Type: ${file.type}` : "Type Unknown";
-                    Alert.alert(
-                        "File Information",
-                        `Name: ${file.name}\n${fileType}\n${fileSize}\n\nTo open this file, you will need a compatibl
-                        application installed.`,
-                        [{text: "OK", style: "default"}]
-                    );
-                };
-
-                const downloadFile = async(file: any) => {
-                    Alert.alert(
-                        "Download File",
-                        `The file "${file.name}" would be downloaded`,
-                        [
-                            {text: "Cancel", style: "cancel"},
-                            {text: "OK", onPress: () => {
-                                Alert.alert("Download", "download function to be implimented here higal")
-                            }}] ) };
-
-                const getFileIcon = (file: any) => {
-                    const fileName = file.name?.toLowerCase() || "";
-                    const fileType = file.type || "";
-                    if(fileType.includes("pdf") || fileName.endsWith(".pdf")) {
-                        return {name: "document-text", color: "#e74c3c"}
-                    }
-                    if(fileType.includes("word") || fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
-                        return {name: "document-text", color: "#2b579a"}
-                    }
-                       if(fileType.includes("powerpoint") || fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-                        return {name: "document-text", color: '#d24726'}
-                    }
-
-                     if(fileType.includes("zip") || fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-                        return {name: "archive", color: '#f39c12'}
-                    }
-                    return {name: "document", color: "#666"}
-                };
-
-          const handleToggleEmoji = () => {
-            setShowEmoji(prev => !prev);
-          }
-       const handleUploadFile = (file: any) => {
-            console.log("Filed received in Chat:", file);
-
-            let messageType: "image" | "video"| "audio"  | "file" = "file";
-            if(file.type.includes("image")) messageType = "image";
-            else if(file.type.includes("video")) messageType = "video";
-            else if(file.type.includes("audio")) messageType = "audio";
-             
-
-                    const newMessage: Message = {
-            id: Date.now().toString(),
-            text: 
-            messageType === "image" 
-            ? "photo" 
-            : messageType === "video"
-             ?  "vidoe" 
-             : messageType === "audio" 
-             ?  "Voice Message"
-             : "Document",
-            sender: "me",
-            timeStamp: new Date().toISOString(),
-            type: messageType,
-            file: file
-        };
-        
-        setMessages((prev) => [newMessage, ...prev]);
-        
-        ws.current?.send(JSON.stringify({
-            type: "file",
-            file: file,
-            sender: "me"
-        }))
-        Alert.alert("Success", `${file.name} sent successfully`)
-        };
- 
  useEffect(() => {
     if(!user?.id || !currentUser?.id)  return;
 
@@ -271,23 +82,12 @@ try { await audioPlayer.startPlayer(uri);
             const res = await axios.get(`${BASE_URL}/messages/${chatId}`);
 
             const formartted= res.data.map((msg: any) => ({
-                id: msg._id,
-                text: msg.text,
-                sender: msg.senderId,
-                timeStamp: msg.createdAt,
-                status: msg.status,
-                type: msg.type,
-                file: msg.file || null
-            }));
-
+                id: msg._id,text: msg.text, sender: msg.senderId,  timeStamp: msg.createdAt, status: msg.status,  type: msg.type, file: msg.file || null   }));
             setMessages(formartted.reverse());
         }catch(err) {
             console.error("Error found while retriveing the messages:",err)
-        }
-    };
-    
+        } };
     fetchMessages();
-  
  ws.current = new WebSocket(WS_URL);
 ws.current.onopen = () => {
   console.log("WebSocket connected successfully");
@@ -297,30 +97,22 @@ ws.current.onopen = () => {
     type: "join", 
     userId: currentUser.id,
     chatId,
-  })
-);
+  }));
 };
 
 ws.current.onmessage = (event) => {
   try {
     const data = JSON.parse(event.data);
-
     if(data.type === "join" || data.type === "status") return
-         
         const newMessage: Message = {
             id: data._id ||  Date.now().toString(),
-            text: data.text, 
-            sender: data.senderId,
-            timeStamp: data.createdAt || new Date().toISOString(),
-            type: data.type,
-            file: data.file || null,
+            text: data.text, sender: data.senderId,    timeStamp: data.createdAt || new Date().toISOString(),  type: data.type,  file: data.file || null,
         };
         setMessages((prev) => [newMessage, ...prev]);
         return;
   } catch (err) {
     console.error("WebSocket message parse error:", err);
-  }
-};
+  }};
                ws.current.onerror = (err) =>
                 console.error("WebSocket error", err);
 
@@ -338,119 +130,21 @@ ws.current.onmessage = (event) => {
             return
         }
         if(!currentUser?.id || !user?.id) {
-            console.log("Chat user is null", user);
-            return
-        }
-
+            console.log("Chat user is null", user);  return  }
         const tempId = Date.now().toString();
         const newMessage: Message = {
-            id: tempId,
-            text: msg,
-            sender: currentUser.id,
-            timeStamp: new Date().toISOString(),
-            status: "sending",
-            type: "text"
-        }
+            id: tempId,  text: msg, sender: currentUser.id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
         setMessages((prev) => [newMessage, ...prev]);
-        const payload = {
-            tempId,
-            chatId,
-            sender: currentUser?.id,
-             receiver: user.id,
-            message: msg,
-            type: "text"
-        };
+        const payload = { tempId, chatId, sender: currentUser?.id,  receiver: user.id, message: msg, type: "text"  };
         ws.current?.send(JSON.stringify(payload));
 setInput("")
     };
-
-        const handleEmojiSelect = (emoji: string) => {
-        setInput(prev => prev + emoji)
-    };
-
      const renderMessage = ({item}: {item: Message}) => {
         const isMe = item.sender === "me";
         if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {
-            const fileIcon = item.type === "file" ? getFileIcon(item.file) : null
 return (
     <View style={[styles.fileContainer, isMe ? styles.myFileMessage :  styles.theirFileMessage]}>
-{
-    item.type === "audio" && item.file && (
-      <View style={[styles.audioPort, isMe ? styles.myFileMessage : styles.theirMessageFile]}>
-  <TouchableOpacity  style={styles.fileContent} activeOpacity={0.7}
-        onPress={handlePlayAudio(item.file.uri)}>
-            <View style={{flexDirection: "row", alignItems: "row"}}>
-<Icon name="mic" size={26} color= "#007AFF"/>
-
-<View style={{flex: 1, marginHorizontal: 10}}>
-    <Text style={{fontSize: 16, color: "back"}}>Voice Message</Text>
-{
-    item.file.duration && (
-        <Text  style={{fontSize: 13, color: "#777"}} >{item.file.duration}s</Text>
-    )}
-
-    <AnimatedCircularProgress 
-size={100}
-width={4}
-file={item.progress * 100}
-tintColor="#007AFF"
-backgroundColor="#eee"
-/>
-</View>
-<Icon name="play-circle" size={26} color= "#007AFF"/>
-            </View>  
-        </TouchableOpacity>
-        <Text style={styles.timeStamp}>
-    {new Date(item.timeStamp).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-    })}
-</Text> 
-        </View>
-    )
-}
-{
-    item.type ==="image" && item.file && (
-        <TouchableOpacity style={styles.fileContent} onPress={() => handleImagePress(item.file.uri)}
-        activeOpacity={0.7}>
-            <Image source={{uri: item.file.uri}} resizeMode="cover" style={styles.image} />
-            <View style={styles.overlay}>
- <Icon name="expand" size={22} color="#fff"  />
-            </View>
-              <Text style={styles.fileText}>{item.text}</Text>
-            <Text style={styles.fileName}>{item.file.name}</Text>
-        </TouchableOpacity>
-    )}
-
-    {
-item.type === "video"  && item.file && (
-    <TouchableOpacity style={styles.fileContent}
-    activeOpacity={0.7} onPress={() => handleVideoPress(item.file)}>
-<View style={styles.video}>
- <Icon name="videocam" size={40} color="#686464ff"  />
- <View style={styles.videoPlay}>
-     <Icon name="play-circle" size={35} color="#ffff"  />
- </View>
-</View>
-<Text style={styles.fileText}>{item.text}</Text>
-       <Text style={styles.fileName}>{item.file.name}</Text>
-       <Text style={{fontSize: 12, color: "#007AFF", fontStyle: "italic"}}>Tap to Play</Text>
-    </TouchableOpacity>
-)}
-
-    {
-item.type === "file"  && item.file && (
-    <TouchableOpacity style={styles.fileContent} onPress={() => handleDocumentPress(item.file)}
-    activeOpacity={0.7}>
-<View style={styles.fileIconContainer}>
- <Icon name={fileIcon?.name || "document"} size={40} color={fileIcon?.name || "#666"}  />
-</View>
-<Text style={styles.fileText}>{item.text}</Text>
-       <Text style={styles.fileName}>{item.file.name}</Text>
-       <Text style={{fontSize: 12, color: "#007AFF", fontStyle: "italic"}}>Tap to open Document</Text>
-    </TouchableOpacity>
-)}
-<Text style={styles.timeStamp}>
+<Text >
     {new Date(item.timeStamp).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit"
@@ -459,7 +153,7 @@ item.type === "file"  && item.file && (
     </View>
 )}
         return (
-<View style={[styles.messageWarp, isMe ? styles.myWrap : styles.theirWrap]}>
+<View style={[ isMe ? styles.myWrap : styles.theirWrap]}>
  <View style={[styles.messageBubble,  isMe ? styles.myMessage : styles.theirMessage ]}>
         <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.theirMessage]} > {item.text} </Text>
             </View>
@@ -472,43 +166,21 @@ item.type === "file"  && item.file && (
                     {new Date(item.timeStamp).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit"
-                    })}
-                </Text>
+                    })} </Text>
                 {isMe && (
                     <View style={{marginLeft: 4}}>
-                        {item.status === "sending" && (
-                            <Icon name="time-outline"  size={12} color= "#999"/>
-                        )}
-
-                        {item.status === "sent" && (
-                            <Icon name="checkmark"  size={12} color= "#999"/>
-                        )}
-
-                           {item.status === "delivered" && (
-                            <Icon name="done-all"  size={12} color= "#999"/>
-                        )}
-
-                           {item.status === "seen" && (
-                            <Icon name="ellipse"  size={12} color= "#2196F3"/>
-                        )}
-
-
-
+                        {item.status === "sending" && (<Icon name="time-outline"  size={12} color= "#999"/>)}
+                        {item.status === "sent" && ( <Icon name="checkmark"  size={12} color= "#999"/> )}
+                        {item.status === "delivered" && ( <Icon name="done-all"  size={12} color= "#999"/> )}
+                        {item.status === "seen" && (<Icon name="ellipse"  size={12} color= "#2196F3"/>)}
                         </View>
                 )}
-            </View>
-           
+            </View>  
 </View>         
         );
     };
-
-
       if(!user) {
-        return <ChatList search={search} currentUser={currentUser}/>
-    };
-        
-
-      
+        return <ChatList search={search} currentUser={currentUser}/>  };
     return(
 <SafeAreaView style={styles.container}>
 <KeyboardAvoidingView
@@ -522,7 +194,7 @@ keyboardVerticalOffset={90}
    <TouchableOpacity onPress={() => navigation.navigate("Chats" as never)} style={styles.arrow}>
             <Icon name="chevron-back" size={26} color="white" />
         </TouchableOpacity>
-       
+    
        <TouchableOpacity onPress={() => navigation.navigate("Profile", {user})}>
       {
           user.avatar ? (
@@ -566,42 +238,16 @@ keyboardVerticalOffset={90}
         inverted />
    )}
 </View>
-<Emoji  
-visible={showEmoji}
-onSelect={ handleEmojiSelect}
-onClose={() => setShowEmoji(false)}/>
 
 <View style={styles.wrapper}>
 <MessageInput 
 onSend={handleSend}
-onToggleEmoji={handleToggleEmoji}
-onUploadFile={handleUploadFile}
 />
 </View>          
     </View>
     </View>
 </KeyboardAvoidingView>
-<ImageViewing 
-images ={imagesForViewing}
-imageIndex={currentImageIndex}
-visible={isImageViewVisible}
-onRequestClose={() => setIsImageViewVisible(false)}
-presentationStyle="overFullScreen"
-animationType="slide"
-backgroundColor="black"
-swipeToCloseEnabled={true}
-doubleTapToZoomEnabled={true}
-/>
-{isPDFViewerVisible && (
-    <View style={styles.pdfView}>
-<View style={styles.pdfHead}>
-<Text style={{color: "white", fontSize: 18, fontWeight: "300", flex: 1}}>{currentFileName}</Text>
-<TouchableOpacity style={{padding: 5}} onPress={() => setIsPDFViewerVisible(false)}>
-<Icon name="close" size={26} color="white" />
-</TouchableOpacity>
-</View>
-    </View>
-)}
+
 </SafeAreaView>
     )
 }

@@ -20,7 +20,6 @@ export default function MessageInput({onSend, onToggleEmoji, onUploadFile}: Prop
     const [input, setInput] = useState("");
     const[showUploadOptions, setShowUploadOptions] = useState(false)
     const[isRecording, setIsRecording] = useState(false);
-    const [recordedFile, setIsRecordedFile] = useState<any>(null);
     const[recordingDuration, setRecordingDurartion] = useState(0)
 
     const audioRecorderPlayerRef =  useRef<AudioRecorderPlayer | null>(null);

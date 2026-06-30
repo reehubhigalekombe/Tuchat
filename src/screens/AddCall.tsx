@@ -12,14 +12,12 @@ type Contact = {
     familyName?:  string;
     phoneNumbers: {
         number: string}[];
-
-        thumbnailPath?: string;
-        
+        thumbnailPath?: string;   
 };
 export default function AddCall() {
     const navigation = useNavigation();
     const[search, setSearch] = useState("");
-  const contacts = useContact();
+  const {contacts = [] }= useContact();
    const filteredContacts = contacts.filter((contact) => {
     const fullName = 
   `  ${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
