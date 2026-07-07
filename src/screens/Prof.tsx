@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import { View, Text, Image, Alert, StyleSheet,  TouchableOpacity} from "react-native";
 import axios from "axios";
-import { launchImageLibrary } from "react-native-image-picker";
+import { Asset, launchImageLibrary } from "react-native-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { AuthStackParamList } from "../navigator/AuthNavigator";
+import { RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
+type ProfRouteProp = RouteProp<AuthStackParamList, "Prof">;
+type ProfNavigationProp = NativeStackNavigationProp<AuthStackParamList, Prof>
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 export default function Prof() {
-    const navigation = useNavigation();
-    const route = useRoute();
+    const navigation = useNavigation<ProfNavigationProp>();
+    const route = useRoute<ProfRouteProp>();
 
-    const {userId} = route.params as {userId: string};
-    const[avatar, setAvatar] = useState<string | null>(null);
+    const {userId} = route.params 
+    const[avatar, setAvatar] = useState<Asset | null>(null);
     const[loading, setLoading]= useState(false);
 
     const pickImage = async () => {
@@ -18,8 +23,8 @@ export default function Prof() {
             mediaType: "photo",
             quality: 0.7
         });
-        if(results.assets &&  results.assets.length > 0) {
-            setAvatar(results.assets[0].uri || null);
+        if(results.assets?.length) {
+            setAvatar(results.assets[0]);
         }
     };
 
@@ -29,12 +34,12 @@ export default function Prof() {
             setLoading(true);
             const formData = new FormData();
             formData.append("avatar", {
-                uri: avatar.startsWith("file://") ? avatar : "file://" + avatar,
-                type: "image/jpeg",
-                name: "avatar.jpg",
+                uri: avatar.uri,
+                type: avatar.type,
+                name: avatar.fileName || `avatar.${avatar.type?.split("/")[1] || "jpg"}`,
             }as any );
             formData.append("userId", userId);
-const res =  await axios.post(`${BASE_URL}/upload/avatar`, formData, {
+const res =  await axios.post(`${BASE_URL}/media/upload/avatar`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -43,9 +48,16 @@ const res =  await axios.post(`${BASE_URL}/upload/avatar`, formData, {
             console.log("Updated the user:", res.data.user)
             navigation.navigate("Login")
 
-        } catch(err) {
-            console.log(err);
-            Alert.alert("Error", "Failed to upload avatar")
+        } catch(err: any) {
+            console.log("UPLOAD NOT SUCCESS");
+            if (err.response) {
+                console.log(err.response.status)
+                console.log(err.response.data)
+            }
+            else {
+                console.log(err.message)
+            }
+        Alert.alert("Error", "Failed to uplaod Avatar")
         } finally {
             setLoading(false)
         }
@@ -56,7 +68,7 @@ const res =  await axios.post(`${BASE_URL}/upload/avatar`, formData, {
 <Text style={styles.head}>Set Your Profile  Pic!!</Text>
 
 <TouchableOpacity onPress={pickImage}>
-<Image source={{uri:  avatar || "https://ui-avatars.com/api/?name=User",}} 
+<Image source={{uri:  avatar?.uri || "https://ui-avatars.com/api/?name=User",}} 
 style={styles.ava} />
 </TouchableOpacity>
 

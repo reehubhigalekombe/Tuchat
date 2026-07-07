@@ -61,7 +61,7 @@ type RouteParams ={
 
     const ws = useRef<WebSocket | null>(null);
     const chatId = currentUser?.id && user?.id?
-  [currentUser?.id, user.id].sort().join("_") : "";
+  [currentUser?._id, user.id].sort().join("_") : "";
 
 useEffect(()  => {
     const parent = navigation.getParent();
@@ -75,7 +75,7 @@ useEffect(()  => {
 }, [navigation])
         
  useEffect(() => {
-    if(!user?.id || !currentUser?.id)  return;
+    if(!user?.id || !currentUser?._id)  return;
 
     const fetchMessages = async () => {
         try{
@@ -95,7 +95,7 @@ ws.current.onopen = () => {
   ws.current?.send(
     JSON.stringify({
     type: "join", 
-    userId: currentUser.id,
+    userId: currentUser._id,
     chatId,
   }));
 };
@@ -125,22 +125,22 @@ ws.current.onmessage = (event) => {
 
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
-        if(!currentUser?.id) {
+        if(!currentUser?._id) {
             console.log("currentUSer is null", currentUser);
             return
         }
-        if(!currentUser?.id || !user?.id) {
+        if(!currentUser?._id || !user?.id) {
             console.log("Chat user is null", user);  return  }
         const tempId = Date.now().toString();
         const newMessage: Message = {
-            id: tempId,  text: msg, sender: currentUser.id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
+            id: tempId,  text: msg, sender: currentUser._id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
         setMessages((prev) => [newMessage, ...prev]);
-        const payload = { tempId, chatId, sender: currentUser?.id,  receiver: user.id, message: msg, type: "text"  };
+        const payload = { tempId, chatId, sender: currentUser?._id,  receiver: user.id, message: msg, type: "text"  };
         ws.current?.send(JSON.stringify(payload));
 setInput("")
     };
      const renderMessage = ({item}: {item: Message}) => {
-        const isMe = item.sender === "me";
+        const isMe = item.sender === currentUser?._id;
         if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {
 return (
     <View style={[styles.fileContainer, isMe ? styles.myFileMessage :  styles.theirFileMessage]}>
@@ -184,7 +184,7 @@ return (
     return(
 <SafeAreaView style={styles.container}>
 <KeyboardAvoidingView
-style={{flex: 1, }}
+style={{flex: 1}}
 behavior={Platform.OS === "android" ? "padding" : undefined}
 keyboardVerticalOffset={90}
 >
@@ -242,6 +242,7 @@ keyboardVerticalOffset={90}
 <View style={styles.wrapper}>
 <MessageInput 
 onSend={handleSend}
+onToggleEmoji={() => {}}
 />
 </View>          
     </View>

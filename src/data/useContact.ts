@@ -1,19 +1,10 @@
 import   {useState, useEffect} from "react";
-import Contacts from "react-native-contacts";
+import Contacts, {Contact} from "react-native-contacts";
 import { Platform, PermissionsAndroid } from "react-native";
 import axios from "axios";
 
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
-export type Contact = {
-    recordID: string;
-    givenName: string;
-    familyName?:  string;
-    phoneNumbers: {
-    number: string}[];
-    thumbnailPath?: string;
-    hasThumbnail?: boolean;
-};
 export type RegisteredUser = {
     _id: string; name: string; handle: string; phone: string; avatar?: string; isOnline?: string
 }
@@ -72,6 +63,4 @@ requestContactsPermission();
 contacts,
  registeredUsers
  };
-
-
 }

@@ -4,7 +4,14 @@ import Login from "../screens/Login";
 import SignUp from "../screens/SignUp";
 import Prof from "../screens/Prof";
 
-const Stack = createNativeStackNavigator();
+export type AuthStackParamList = {
+    Login: undefined;
+    SignUp: undefined
+    Prof: {
+        userId: string;
+    }
+}
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator({setIsAuthenticated}: any) {
     return (
