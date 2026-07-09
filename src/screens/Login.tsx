@@ -20,7 +20,8 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
     if(!userContext) {
         throw new Error("UserContext Must be inside the Provider");
     }
-    const {setCurrentUser} = userContext
+    const {setCurrentUser} = userContext;
+
 
      const handleLogin = async () => {
         if(!handle || !password) return Alert.alert(" All fields are required to be filled");
@@ -28,10 +29,10 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
             setLoading(true)
             const res = await axios.post(`${BASE_URL}/auth/login`, { handle, password});
             const user =  res.data.user;
-            const token = res.data.token;
             console.log("Login User: ", user)
-
+            const token = res.data.token;
             setCurrentUser(user);
+                        console.log("Current user has been set in the context")
             await KeyChain.setGenericPassword(user.handle, token)
             Alert.alert(`Woow, Login Sucess, ${res.data.user.handle}`);
 

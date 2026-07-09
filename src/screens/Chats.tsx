@@ -57,11 +57,11 @@ type RouteParams ={
             setMessages(user.message)
         }
     }, [user])
-    const[isOnline, setIsOnline] = useState(true)
+
 
     const ws = useRef<WebSocket | null>(null);
-    const chatId = currentUser?.id && user?.id?
-  [currentUser?._id, user.id].sort().join("_") : "";
+    const chatId = currentUser?._id && user?.id
+    ? [currentUser?._id, user.id].sort().join("_") : "";
 
 useEffect(()  => {
     const parent = navigation.getParent();
@@ -139,6 +139,10 @@ ws.current.onmessage = (event) => {
         ws.current?.send(JSON.stringify(payload));
 setInput("")
     };
+
+    useEffect(() => {
+        console.log("Current user in context:", currentUser)
+    }, currentUser)
      const renderMessage = ({item}: {item: Message}) => {
         const isMe = item.sender === currentUser?._id;
         if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {

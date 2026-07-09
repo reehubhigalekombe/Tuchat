@@ -7,7 +7,6 @@ import { launchImageLibrary, launchCamera } from "react-native-image-picker";
 import { UserContext } from "../context/UserContext";
 
 export default function OwnerProfile() {
-
     const navigation = useNavigation()
     const[modalVisible, setModalVisible] = useState(false);
     const[loading, setLoading] = useState(false);
@@ -16,7 +15,7 @@ export default function OwnerProfile() {
     if(!userContext){
         throw new Error("UserContext is not defined")
     }
-    const {avatar, setAvatar}= useContext(UserContext)
+    const {avatar, setAvatar}= useContext
 
 const showImagePickerOptions = () => {
     Alert.alert(
@@ -105,7 +104,7 @@ const handleChangeAvatar = () => {
 
 <ScrollView style={styles.mainContainer}>
 <View style={styles.picContainer}>
-<TouchableOpacity onPress={() => navigation.goBack}
+<TouchableOpacity onPress={() => navigation.goBack()}
     style={{left: 10, position: "absolute"}} >
     <Icon  name="chevron-back" size={24} color= "rgba(10,157,241,1)"/>
 </TouchableOpacity>
@@ -131,7 +130,9 @@ const handleChangeAvatar = () => {
 <Modal visible={modalVisible} transparent animationType="fade"  >
  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
        <View style={styles.modalPort}>
-<Image source={{uri: avatar}} style={styles.modalImage} />
+<Image source={{uri: avatar  
+    ||    "https://ui-avatars.com/api/?name=User",
+}} style={styles.modalImage} />
 <TouchableOpacity onPress={() => setModalVisible(false)}>
        <Icon  name="close" size={24} color="white" />
 </TouchableOpacity>

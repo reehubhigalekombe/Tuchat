@@ -4,7 +4,7 @@ type CurrentUser = {
     name: string,
     handle: string,
     phone: string,
-    avatar?: string,
+    avatar?: string,   
 };
 type UserContextType = {
     currentUser: CurrentUser | null;
@@ -13,7 +13,7 @@ type UserContextType = {
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 type Props = {
     children: ReactNode;
-}
+} 
 export default function UserProvider ({children}: Props) {
     const[currentUser, setCurrentUser] = 
     useState<CurrentUser| null>(null);
