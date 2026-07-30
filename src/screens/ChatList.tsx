@@ -1,6 +1,5 @@
 import React from "react";
-import { FlatList, View, TouchableOpacity, StyleSheet, Text,
-} from "react-native";
+import { FlatList, View, TouchableOpacity, StyleSheet, Text,} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ChatItem from "./ChatItem";
 import  Icon  from "react-native-vector-icons/Ionicons";
@@ -12,7 +11,7 @@ import axios from "axios";
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 type RegisteredUser = {
-  id: string;
+  _id: string;
   name: string;
   handle: string;
   phone: string;
@@ -131,13 +130,15 @@ export default function ChatList({search, currentUser,}: Props) {
             normalizePhone( contact.phoneNumbers[0]?.number || "")
           );
           if(!matchUser) return null;
-          return {
+          const contactUser =  {
            id: matchUser._id,
             name: matchUser.name,
             avatar: matchUser.avatar,
             online: matchUser.isOnline,
             type:  "contact" as const,
           };
+          console.log("Created Contact:", contactUser);
+          return contactUser
          })
          .filter(
           (item
@@ -185,15 +186,18 @@ export default function ChatList({search, currentUser,}: Props) {
       return(
         <TouchableOpacity 
         style={styles.myContact}
-        onPress={() => navigation.navigate("Chats" as never, {
-          user: {
+        onPress={() => {
+          console.log("Pressed Item:", item);
+          navigation.navigate("Chats" as never, {
+             user: {
             id: item.id,
             name: item.name,
             avatar: item.avatar,
             message: [],
           },
-          isNewChat: true,
-        })}>
+          isNewChat: true
+          });
+        } }>
           
           <View style={styles.avatarContact}>
 <Text >

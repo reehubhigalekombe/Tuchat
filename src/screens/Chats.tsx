@@ -46,6 +46,7 @@ type RouteParams ={
      const[isOnline, setIsOnline] = useState(true);
 
     const user  = (route.params as RouteParams | undefined )?.user;
+    console.log("Route user", user)
     const userContext = useContext(UserContext);
     if(!userContext) {
         throw new Error ("{UserContext must be inside UserPrtovider}")
@@ -153,7 +154,9 @@ ws.current.onmessage = (event) => {
         const newMessage: Message = {
             id: tempId,  text: msg, sender: currentUser.id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
         setMessages((prev) => [newMessage, ...prev]);
+        console.log("Reciever user", user)
         const payload = { tempId, chatId, sender: currentUser?.id,  receiver: user.id, message: msg, type: "text"  };
+        console.log("Paylaod:", payload)
         ws.current?.send(JSON.stringify(payload));
 
     };
