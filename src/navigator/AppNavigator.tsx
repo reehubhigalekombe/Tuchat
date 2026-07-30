@@ -22,20 +22,14 @@ import Chats from "../screens/Chats";
 
 const Stack = createNativeStackNavigator();
 
-interface AppNavigatorProps {
-    setIsAuthenticated: (value: boolean) => void
-}
-export default function AppNavigator({setIsAuthenticated}: AppNavigatorProps) {
+
+export default function AppNavigator() {
 
     return (
          
-          <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Home">
-{() => (
-    <Home setIsAuthenticated={setIsAuthenticated}   />
-)
-}
-        </Stack.Screen>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+        <Stack.Screen name="Home" component={Home}/>
+    
     <Stack.Screen name="Camera" component={CameraScr} />
     <Stack.Screen  name="StatusView" component={StatusView}/>
       <Stack.Screen name="Calls" component={Calls} />

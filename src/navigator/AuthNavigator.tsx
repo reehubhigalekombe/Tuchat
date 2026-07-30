@@ -13,14 +13,10 @@ export type AuthStackParamList = {
 }
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
-export default function AuthNavigator({setIsAuthenticated}: any) {
+export default function AuthNavigator() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }} >
-
-            <Stack.Screen name="Login">
-              {(props)  => <Login {...props} setIsAuthenticated={setIsAuthenticated}  />}
-            </Stack.Screen>
-
+            <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="SignUp" component={SignUp}  />
             <Stack.Screen  name="Prof"  component={Prof}/>
         </Stack.Navigator>

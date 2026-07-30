@@ -10,7 +10,6 @@ import * as Keychain from "react-native-keychain"
 type Props = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  setIsAuthenticated: (v: boolean) => void;
   search: string
   setSearch: (v: string) => void
 
@@ -18,14 +17,14 @@ type Props = {
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 export default function Navbar({activeTab, setActiveTab, 
-  setIsAuthenticated, search, setSearch }: Props) {
-const navigation = useNavigation();
+  search, setSearch }: Props) {
+  const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const userContext  = useContext(UserContext)
   if(!userContext) {
     throw new Error ("UserContext must be used inside UserProvider");
   }
-  const {currentUser, setCurrentUser} = userContext
+  const {currentUser, logout} = userContext
 
 const handleLogOut = async () => {
   try {
@@ -35,10 +34,8 @@ const handleLogOut = async () => {
     }
   await axios.post(`${BASE_URL}/auth/logout`, {userId: currentUser.id});
   await Keychain.resetGenericPassword();
-  await AsyncStorage.clear();
-  setCurrentUser(null)
-    setIsAuthenticated(false);
-
+  await logout()
+  console.log("User logout success")
   }catch(err) {
     console.log("Log-out failed")
   }

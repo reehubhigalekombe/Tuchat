@@ -1,40 +1,39 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext} from "react";
+import { View} from "react-native";
+import { ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import AppNavigator from "./src/navigator/AppNavigator";
 import AuthNavigator from "./src/navigator/AuthNavigator";
-import UserProvider from "./src/context/UserContext"
-import * as Keychain from "react-native-keychain"
+import UserProvider, {UserContext} from "./src/context/UserContext"
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkLogin = async ()  => {
-    try {
-      const creds = await Keychain.getGenericPassword();
-      if(creds) {
-        setIsAuthenticated(true)
-      } else {
-        setIsAuthenticated(false)
-      }
-    }catch(err) {
-      console.error()
-    }
-    }
-    checkLogin();
-  }, [])
+function RootNavigator () {
+  const userContext = useContext(UserContext);
+  if (!userContext) {
+    throw new Error(("UserComtext must be used insde the userprovidert"));
+    
+  }
+  
+const {currentUser, loading} = userContext;
+if(loading) {
   return (
-    <UserProvider>
-      <NavigationContainer>
-      {
-        isAuthenticated ? (
-          <AppNavigator setIsAuthenticated={setIsAuthenticated}/>
-        ) : (
-          <AuthNavigator setIsAuthenticated={setIsAuthenticated}   />
-        )
-      }
+    <View style={{flex:1, justifyContent: "center", alignItems: "center"}}>
+      <ActivityIndicator size="large" color="#0A9DF1"  />
+    </View>
+  )
+}
+return (
+  <NavigationContainer>
+{currentUser ? 
+  <AppNavigator/> : <AuthNavigator/>}
 
     </NavigationContainer>
+)
+}
+export default function App() {
+
+  return (
+    <UserProvider>
+     <RootNavigator/>
     </UserProvider>
   )
 }

@@ -12,7 +12,7 @@ import axios from "axios";
 const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 type RegisteredUser = {
-  _id: string;
+  id: string;
   name: string;
   handle: string;
   phone: string;
@@ -20,7 +20,7 @@ type RegisteredUser = {
   isOnline?: boolean;
 };
 type CurrentUser =  {
-  _id: string;
+  id: string;
 } | null;
 
 type Props = {
@@ -31,7 +31,7 @@ type Props = {
 type Conversations = {
   chatId: string;
   user: {
-    _id: string;
+    id: string;
     name: string,
     avatar?: string,
   };
@@ -61,9 +61,9 @@ export default function ChatList({search, currentUser,}: Props) {
 
     const fetchConversations = async () => {
   try {
-    if(!currentUser?._id) return;
+    if(!currentUser?.id) return;
     const res = await axios.get(
-      `${BASE_URL}/messages/conversations/${currentUser._id}`
+      `${BASE_URL}/messages/conversations/${currentUser.id}`
     );  
     setConversations(res.data)
   } catch(err) {
@@ -73,9 +73,8 @@ export default function ChatList({search, currentUser,}: Props) {
 
     useEffect(() => {
         fetchConversations();
-    }, [currentUser?._id])
+    }, [currentUser?.id])
 
-    
     useEffect(() => {
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -161,7 +160,7 @@ export default function ChatList({search, currentUser,}: Props) {
 
   <FlatList
     data={mergedData}
-    keyExtractor={(item) => item.id}
+    keyExtractor={(item) => `${item.type} - ${item.id}`}
     renderItem={({ item }) => {
 
       if (item.type === "chat")  {

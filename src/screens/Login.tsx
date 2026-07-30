@@ -1,17 +1,14 @@
 import React, {useState, useContext} from "react";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
-import { View,Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
+import { View, Image, StyleSheet,  Platform, KeyboardAvoidingView, ActivityIndicator,
     TextInput, TouchableOpacity, Alert, Text } from "react-native";
 import { UserContext } from "../context/UserContext";
 import * as KeyChain from "react-native-keychain"
 
 const BASE_URL = "https://tuback-8pr0.onrender.com"
 
-interface LoginProps {
-    setIsAuthenticated: (value: boolean) => void
-}
-export default function  Login({setIsAuthenticated}: LoginProps) {
+export default function  Login() {
     const navigation = useNavigation()
     const [handle, setHandle] = useState("");
     const [password, setPassword] = useState("");
@@ -20,7 +17,7 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
     if(!userContext) {
         throw new Error("UserContext Must be inside the Provider");
     }
-    const {setCurrentUser} = userContext;
+    const {login} = userContext;
 
 
      const handleLogin = async () => {
@@ -31,12 +28,11 @@ export default function  Login({setIsAuthenticated}: LoginProps) {
             const user =  res.data.user;
             console.log("Login User: ", user)
             const token = res.data.token;
-            setCurrentUser(user);
-                        console.log("Current user has been set in the context")
+            console.log("Login User:", user)
             await KeyChain.setGenericPassword(user.handle, token)
-            Alert.alert(`Woow, Login Sucess, ${res.data.user.handle}`);
-
-            setIsAuthenticated(true)
+            await login(user);
+            console.log("Userstored success in the usercontext")
+            Alert.alert(`Welcome ${user.handle}!`);
 
         }catch (err: any) {
             console.error(err)

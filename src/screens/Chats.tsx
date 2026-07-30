@@ -43,13 +43,15 @@ type RouteParams ={
 
     const route = useRoute();
     const navigation = useNavigation();
+     const[isOnline, setIsOnline] = useState(true);
 
     const user  = (route.params as RouteParams | undefined )?.user;
     const userContext = useContext(UserContext);
     if(!userContext) {
         throw new Error ("{UserContext must be inside UserPrtovider}")
     }
-    const{currentUser} = userContext
+    const{currentUser} = userContext;
+    console.log(currentUser)
 
     const [messages, setMessages] = useState<Message[]>([]);
     useEffect(() => {
@@ -60,8 +62,8 @@ type RouteParams ={
 
 
     const ws = useRef<WebSocket | null>(null);
-    const chatId = currentUser?._id && user?.id
-    ? [currentUser?._id, user.id].sort().join("_") : "";
+    const chatId = currentUser?.id && user?.id
+    ? [currentUser?.id, user.id].sort().join("_") : "";
 
 useEffect(()  => {
     const parent = navigation.getParent();
@@ -75,15 +77,15 @@ useEffect(()  => {
 }, [navigation])
         
  useEffect(() => {
-    if(!user?.id || !currentUser?._id)  return;
+    if(!user?.id || !currentUser?.id)  return;
 
     const fetchMessages = async () => {
         try{
             const res = await axios.get(`${BASE_URL}/messages/${chatId}`);
 
-            const formartted= res.data.map((msg: any) => ({
+            const formatted= res.data.map((msg: any) => ({
                 id: msg._id,text: msg.text, sender: msg.senderId,  timeStamp: msg.createdAt, status: msg.status,  type: msg.type, file: msg.file || null   }));
-            setMessages(formartted.reverse());
+            setMessages(formatted.reverse());
         }catch(err) {
             console.error("Error found while retriveing the messages:",err)
         } };
@@ -95,7 +97,7 @@ ws.current.onopen = () => {
   ws.current?.send(
     JSON.stringify({
     type: "join", 
-    userId: currentUser._id,
+    userId: currentUser.id,
     chatId,
   }));
 };
@@ -108,7 +110,23 @@ ws.current.onmessage = (event) => {
             id: data._id ||  Date.now().toString(),
             text: data.text, sender: data.senderId,    timeStamp: data.createdAt || new Date().toISOString(),  type: data.type,  file: data.file || null,
         };
-        setMessages((prev) => [newMessage, ...prev]);
+        setMessages((prev) => {
+            const tempIndex = prev.findIndex(
+                (msg) => msg.id === data.tempId
+            );
+            if(tempIndex !== -1) {
+                const updated = [...prev];
+                updated[tempIndex] = {
+
+                ...updated[tempIndex],
+                id: data._id,
+                status: "sent",
+                timeStamp: data.createdAt
+                };
+                  return updated;
+            };
+            return [newMessage];
+        });
         return;
   } catch (err) {
     console.error("WebSocket message parse error:", err);
@@ -121,30 +139,30 @@ ws.current.onmessage = (event) => {
                return () =>{
                 ws.current?.close()
                }
- }, [chatId]);
+ }, [chatId, currentUser, user]);
 
  const handleSend = (msg: string) => {
         if(!msg.trim()) return;
-        if(!currentUser?._id) {
+        if(!currentUser?.id) {
             console.log("currentUSer is null", currentUser);
             return
         }
-        if(!currentUser?._id || !user?.id) {
+        if(!currentUser?.id || !user?.id) {
             console.log("Chat user is null", user);  return  }
         const tempId = Date.now().toString();
         const newMessage: Message = {
-            id: tempId,  text: msg, sender: currentUser._id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
+            id: tempId,  text: msg, sender: currentUser.id, timeStamp: new Date().toISOString(),  status: "sending",  type: "text"  }
         setMessages((prev) => [newMessage, ...prev]);
-        const payload = { tempId, chatId, sender: currentUser?._id,  receiver: user.id, message: msg, type: "text"  };
+        const payload = { tempId, chatId, sender: currentUser?.id,  receiver: user.id, message: msg, type: "text"  };
         ws.current?.send(JSON.stringify(payload));
-setInput("")
+
     };
 
     useEffect(() => {
         console.log("Current user in context:", currentUser)
-    }, currentUser)
+    }, [currentUser])
      const renderMessage = ({item}: {item: Message}) => {
-        const isMe = item.sender === currentUser?._id;
+        const isMe = item.sender === currentUser?.id;
         if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {
 return (
     <View style={[styles.fileContainer, isMe ? styles.myFileMessage :  styles.theirFileMessage]}>

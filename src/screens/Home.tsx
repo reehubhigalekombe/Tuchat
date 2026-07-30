@@ -3,10 +3,7 @@ import { View, StyleSheet } from "react-native";
 import Navbar from "../component/Navbar";
 import BottomTab from "../navigator/BottomTab";
 
-interface HomeProps {
-    setIsAuthenticated: (value: boolean) => void
-}
-export default function Home ({setIsAuthenticated}: HomeProps) {
+export default function Home () {
     const [activeTab, setActiveTab] = useState("Chats")
     const[search, setSearch] = useState("");
 
@@ -15,7 +12,6 @@ export default function Home ({setIsAuthenticated}: HomeProps) {
 <Navbar    
 activeTab={activeTab}
 setActiveTab={setActiveTab}
-setIsAuthenticated={setIsAuthenticated}
 search={search}
 setSearch={setSearch}
 
