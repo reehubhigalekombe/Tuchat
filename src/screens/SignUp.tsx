@@ -12,12 +12,27 @@ export default function SignUp() {
     const [name, setName] = useState("");
     const [handle, setHandle] = useState("");
     const [password, setPassword] = useState("");
-    const [phone, setPhone] = useState("")
+    const [phone, setPhone] = useState("");
+
+    const normalizePhone = (phone: string) => {
+        let cleaned = phone.replace(/\D/g, "");
+        if(cleaned.startsWith("0")) {
+            cleaned = "254" + cleaned.substring(1)
+        }
+
+        if(cleaned.startsWith("254")) {
+            return cleaned
+        }
+    }
 
     const handleSignUp = async () => {
         if(!name || !handle || !phone || !password) return Alert.alert(" All fields are required to be filled");
         try {
-            const res = await axios.post(`${BASE_URL}/auth/register`, {name, handle, phone,  password});
+            const res = await axios.post(`${BASE_URL}/auth/register`, {
+                name, 
+                handle,
+                 phone: normalizePhone(phone),
+                   password});
             Alert.alert(`Woow, user account has been created, ${res.data.user.handle}`);
             navigation.navigate("Prof", {
                 userId: res.data.user._id

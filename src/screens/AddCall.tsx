@@ -17,27 +17,48 @@ type Contact = {
 export default function AddCall() {
     const navigation = useNavigation();
     const[search, setSearch] = useState("");
-  const {contacts = [] }= useContact();
-   const filteredContacts = contacts.filter((contact) => {
+    const {contacts = [], registeredUsers = [],}= useContact();
+
+    const filteredContacts = contacts.filter((contact) => {
     const fullName = 
   `  ${contact.givenName} ${contact.familyName || ""}`.toLowerCase();
   return fullName.includes(search.toLowerCase())
    });
 
-
+const normalizePhone = (phone: string) =>  {
+    let cleaned = phone.replace(/\D/g, "");
+    if(cleaned.startsWith("0")) {
+        cleaned = "254" + cleaned.substring(1)
+    }
+    return cleaned
+}
+    
 const handleContactSelect = (contact: Contact) => {
+    const phone = normalizePhone(
+        contact.phoneNumbers?.[0]?.number || ""
+    );
+    console.log("Selected Phone:", phone);
+    console.log("Registered phone: ", 
+        registeredUsers.map((user) => normalizePhone(user.phone))
+    )
+    const registeredUser = registeredUsers.find(
+        user => normalizePhone(user.phone) === phone
+    );
+    console.log("Matched User: ", registeredUser)
+    if(!registeredUser) {
+        console.log("User is not registered with TuChat Account");
+        return
+    }
     navigation.navigate("Chats" as never, {
    user: {
-            id: contact.recordID,
-            name: `${contact.givenName} ${contact.familyName || ""}`,
-            phoneNumber: 
-            contact.phoneNumbers?.[0]?.number || "nNo Number",
-            avatar: contact.thumbnailPath || null,
-            messages: [],
+            id: registeredUser._id,
+            name: registeredUser.name,
+            avatar: registeredUser.avatar || null,
+            phone: registeredUser.phone,
+            messages: []
         },
         isNewChat: true,
-    } as never
-);
+    } as never);
 };
     return (
 <View style={styles.port}>

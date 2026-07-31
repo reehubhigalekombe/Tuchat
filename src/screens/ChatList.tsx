@@ -61,8 +61,7 @@ export default function ChatList({search, currentUser,}: Props) {
     const fetchConversations = async () => {
   try {
     if(!currentUser?.id) return;
-    const res = await axios.get(
-      `${BASE_URL}/messages/conversations/${currentUser.id}`
+    const res = await axios.get(`${BASE_URL}/messages/conversations/${currentUser.id}`
     );  
     setConversations(res.data)
   } catch(err) {
