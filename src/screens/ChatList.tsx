@@ -32,13 +32,15 @@ type Conversations = {
   user: {
     id: string;
     name: string,
+    phone: string,
     avatar?: string,
   };
-  lastMessage: string
+  lastMessage: string,
+  updatedAt: string
 }
 
 type ChatItemType = |
-{ type: "chat";  id: string; chatId: string; user: any; lastMessage: string} |
+{ type: "chat";  id: string; chatId: string; user: any; lastMessage: string,   updatedAt: string} |
 {
   type: "contact"; id: string; name: string; avatar?:string; online?: boolean
 }
@@ -49,20 +51,29 @@ export default function ChatList({search, currentUser,}: Props) {
     const bounceAnim = useRef(new Animated.Value(0)).current;
     const query = search?.toLowerCase() || "";
     const {contacts=[], registeredUsers = [],} = useContact();
-    const users: RegisteredUser[] = registeredUsers
-    
+    const users: RegisteredUser[] = registeredUsers;
+    const normalizePhone = (phone: string) => {
+      return (phone || "").replace(/\D/g, "");
+    }
+    const contactMap = new Map<string, string>();
+    contacts.forEach(contact => {
+      const phone = normalizePhone(contact.phoneNumbers[0]?.number || "");
+      const displayName = `${contact.givenName} ${contact.familyName || ""}`.trim();
+      if(phone) {
+        contactMap.set(phone, displayName)
+      }
+    });
+
+  
     const [conversations, setConversations] = useState<Conversations[]>([]);
     console.log("ChatList currentUser: ", currentUser);
-
-    const normalizePhone = (phone: string) => {
-      return phone.replace(/\D/g, "");
-    }
 
     const fetchConversations = async () => {
   try {
     if(!currentUser?.id) return;
     const res = await axios.get(`${BASE_URL}/messages/conversations/${currentUser.id}`
     );  
+    console.log("Coversations response: ", res.data)
     setConversations(res.data)
   } catch(err) {
     console.error(err)
@@ -120,6 +131,7 @@ export default function ChatList({search, currentUser,}: Props) {
         chatId: item.chatId,
         user: item.user,
         lastMessage: item.lastMessage,
+          updatedAt: item.updatedAt,
         type: "chat" as const,
       })),
          ...filteredContacts.map(contact=> {
@@ -129,9 +141,10 @@ export default function ChatList({search, currentUser,}: Props) {
             normalizePhone( contact.phoneNumbers[0]?.number || "")
           );
           if(!matchUser) return null;
+           const displayName = `${contact.givenName} ${contact.familyName || ""} `.trim()
           const contactUser =  {
            id: matchUser._id,
-            name: matchUser.name,
+            name: displayName,
             avatar: matchUser.avatar,
             online: matchUser.isOnline,
             type:  "contact" as const,
@@ -152,6 +165,7 @@ export default function ChatList({search, currentUser,}: Props) {
         chatId:  item.chatId,
         user: item.user,
         lastMessage: item.lastMessage,
+          updatedAt: item.updatedAt,
         type: "chat"
 
       }))
@@ -164,20 +178,32 @@ export default function ChatList({search, currentUser,}: Props) {
     renderItem={({ item }) => {
 
       if (item.type === "chat")  {
+        console.log("Conversations user: ", item.user);
+        const normalizedPhone = normalizePhone(item.user.phone);
+        console.log("Phone from server: ", item.user.phone);
+        console.log("Normarlized phone: ", normalizedPhone);
+        console.log("Phonebook match: ", contactMap.get(normalizedPhone))
+        const displayUser = {
+  ...item.user,
+  name:
+    contactMap.get(normalizePhone(item.user.phone)) ??
+    item.user.name,
+};
         return (
           <ChatItem 
-          user={item.user}
+          user={displayUser}
           lastMessage={item.lastMessage}
+          timeStamp={item.updatedAt}
           onPressRow={() => navigation.navigate(
             "Chats" as never,
-             {user: item.user,
+             {user: displayUser,
                  chatId: item.chatId,
              } as never
             )
             }
           onPressAvatar={() => navigation.navigate("Profile" as never, 
             {
-              user: item.user,
+              user: displayUser,
             } as never)}
           />
         )}
