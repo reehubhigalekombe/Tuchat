@@ -52,9 +52,16 @@ export default function ChatList({search, currentUser,}: Props) {
     const query = search?.toLowerCase() || "";
     const {contacts=[], registeredUsers = [],} = useContact();
     const users: RegisteredUser[] = registeredUsers;
+
     const normalizePhone = (phone: string) => {
-      return (phone || "").replace(/\D/g, "");
-    }
+        let cleaned =  phone.replace(/\D/g, "");
+        // Here we convert Kenyan local contacts (07....) to the international format (254...);
+        if(cleaned.startsWith("0")) {
+            cleaned = "254" + cleaned.slice(1)
+        }
+        return cleaned;
+      }
+   
     const contactMap = new Map<string, string>();
     contacts.forEach(contact => {
       const phone = normalizePhone(contact.phoneNumbers[0]?.number || "");

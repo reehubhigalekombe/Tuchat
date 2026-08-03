@@ -11,8 +11,16 @@ export type RegisteredUser = {
 
 export default function useContact() {
       const[contacts, setContacts] = useState<Contact[]>([]);
-      const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([])
-     
+      const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
+      
+      const normalizePhone = (phone: string) => {
+        let cleaned =  phone.replace(/\D/g, "");
+        // Here we convert Kenyan local contacts (07....) to the international format (254...);
+        if(cleaned.startsWith("0")) {
+            cleaned = "254" + cleaned.slice(1)
+        }
+        return cleaned;
+      }
       const loadContacts = async () => {
               try {
                   const deviceContacts = await Contacts.getAll();
@@ -27,7 +35,7 @@ export default function useContact() {
           const formatted = deviceContacts
            .filter(c => c.phoneNumbers.length > 0)
            .map(c =>  ({
-            phone: c.phoneNumbers[0].number
+            phone: normalizePhone(c.phoneNumbers[0].number)
             .replace(/\D/g, "")
            }));
              const res = await axios.post(`${BASE_URL}/contacts/sync`, {

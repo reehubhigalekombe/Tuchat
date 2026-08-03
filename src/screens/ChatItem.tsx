@@ -30,6 +30,15 @@ const getInitials = (name: string) => {
 };
 
 export default function ChatItem({user, lastMessage, timeStamp, onPressRow, onPressAvatar}: Props) {
+    const getAvatarColor =  (id: string) => {
+        let hash = 0;
+        for(let i = 0; i < id.length; i++) {
+            hash = id.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash)% 360;
+        return `hsl(${hue}, 65%, 50%)`
+
+    }
     const formatTime  = (dateString?: string) => {
         if(!dateString) return "";
         const messageDate = new Date(dateString);
@@ -55,7 +64,7 @@ const diffrentDays = (now.getTime() - messageDate.getTime()) /
 (1000 * 60 * 60 * 24);
 if(diffrentDays <7) {
     return messageDate.toLocaleDateString([],{
-        weekday: "short"
+        weekday: "long"
     });
 }
 
@@ -72,7 +81,11 @@ return messageDate.toLocaleDateString([],  {
 {user.avatar ? (
         <Image source={{uri: user.avatar}} style={styles.avatar}  />
     ) : (
-        <View style={styles.avatarFall} >
+        <View style={[
+            styles.avatarFall,
+            {backgroundColor:getAvatarColor(user.id),},
+        ]} >
+
            <Text style={styles.avatarText} >
              {getInitials(user.name)}
            </Text>
@@ -126,6 +139,7 @@ width: 100,
     },
     statusDot: {
 width: 12,
+
 height:12,
 borderRadius: 6, right: 2, position: "absolute", top: 2, borderWidth: 1, borderColor: "white"
     },
@@ -136,7 +150,8 @@ justifyContent: "center",
 alignItems: "center",
 borderRadius: 29,
 marginRight: 2,
-backgroundColor: "blue"
+
+
     },
     avatarText: {
 color: "#fff", 
