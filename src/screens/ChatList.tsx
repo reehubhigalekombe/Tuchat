@@ -36,11 +36,14 @@ type Conversations = {
     avatar?: string,
   };
   lastMessage: string,
+  status: "sent" | "delivered" | "seen";
   updatedAt: string
 }
 
 type ChatItemType = |
-{ type: "chat";  id: string; chatId: string; user: any; lastMessage: string,   updatedAt: string} |
+{ type: "chat";  id: string; chatId: string; user: any; lastMessage: string, 
+  status: "sent"| "delivered" | "seen"
+  updatedAt: string} |
 {
   type: "contact"; id: string; name: string; avatar?:string; online?: boolean
 }
@@ -80,7 +83,7 @@ export default function ChatList({search, currentUser,}: Props) {
     if(!currentUser?.id) return;
     const res = await axios.get(`${BASE_URL}/messages/conversations/${currentUser.id}`
     );  
-    console.log("Coversations response: ", res.data)
+    console.log("Coversations response: ", JSON.stringify(res.data, null, 2))
     setConversations(res.data)
   } catch(err) {
     console.error(err)
@@ -138,7 +141,8 @@ export default function ChatList({search, currentUser,}: Props) {
         chatId: item.chatId,
         user: item.user,
         lastMessage: item.lastMessage,
-          updatedAt: item.updatedAt,
+        status: item.status,
+        updatedAt: item.updatedAt,
         type: "chat" as const,
       })),
          ...filteredContacts.map(contact=> {
@@ -172,6 +176,7 @@ export default function ChatList({search, currentUser,}: Props) {
         chatId:  item.chatId,
         user: item.user,
         lastMessage: item.lastMessage,
+        status: item.status,
           updatedAt: item.updatedAt,
         type: "chat"
 
@@ -201,6 +206,7 @@ export default function ChatList({search, currentUser,}: Props) {
           user={displayUser}
           lastMessage={item.lastMessage}
           timeStamp={item.updatedAt}
+          status={item.status}
           onPressRow={() => navigation.navigate(
             "Chats" as never,
              {user: displayUser,

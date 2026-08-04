@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons"
 
 type Props = {
     user: {
@@ -10,6 +11,7 @@ type Props = {
     };
       lastMessage?: string,
       timeStamp?: string,
+      status?: "sent" | "delivered" | "seen"
     onPressRow: () => void;
     onPressAvatar: () => void
 }
@@ -29,7 +31,7 @@ const getInitials = (name: string) => {
   );
 };
 
-export default function ChatItem({user, lastMessage, timeStamp, onPressRow, onPressAvatar}: Props) {
+export default function ChatItem({user, lastMessage, timeStamp, status,  onPressRow, onPressAvatar}: Props) {
     const getAvatarColor =  (id: string) => {
         let hash = 0;
         for(let i = 0; i < id.length; i++) {
@@ -73,6 +75,27 @@ return messageDate.toLocaleDateString([],  {
     month: "2-digit",
     year: "2-digit"
 })
+    };
+
+    const renderStatus = () => {
+        console.log("Is status received: ", status)
+        switch(status) {
+            case "sent": return (
+                <Icon name="checkmark"   size={17} color="#000" />
+            );
+
+               case "delivered": return (
+                    <Icon name="checkmark-done-outline"   size={15} color="#2196F3"/>
+               );
+
+               case "seen" : return (
+                <Icon name="checkmark-done-outline"   size={15} color="#999" />
+               );
+               default:
+                console.log("Unknown status: ", status);
+                return null;
+
+        }
     }
     return(
         
@@ -102,6 +125,7 @@ return messageDate.toLocaleDateString([],  {
          </View>
          <View style={styles.right}>
 <Text style={styles.time}>{formatTime(timeStamp)}</Text>
+{renderStatus()}
          </View>
 </TouchableOpacity>
      
@@ -120,6 +144,8 @@ const styles = StyleSheet.create({
 flex: 1, justifyContent: "center", marginLeft: 12, 
    },
     right: {
+        flexDirection: "column",
+        gap:3,
 alignItems: "flex-end",
 justifyContent: "flex-start",
 width: 100,
