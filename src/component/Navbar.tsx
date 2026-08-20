@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity, StyleSheet, Modal, Image, TextInput } fro
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserContext} from "../context/UserContext";
 import * as Keychain from "react-native-keychain"
 

@@ -9,6 +9,7 @@ import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import ChatList from "./ChatList";
 import { UserContext } from "../context/UserContext";
+import useContact from "../data/useContact";
 
 const getInitials = (name: string) => {
   if (!name) return "";
@@ -37,7 +38,7 @@ export default function Chats({search}: Prop) {
 };
 
 type RouteParams ={
-    user: {id: string, name: string, avatar: string,  online: boolean,
+    user: {id: string, name: string, phone?:string, avatar: string,  online: boolean,
         lastMessage? :string, message? : Message[], timeStamp? : string  };
 };
 
@@ -49,10 +50,39 @@ type RouteParams ={
     console.log("Route user", user)
     const userContext = useContext(UserContext);
     if(!userContext) {
+
         throw new Error ("{UserContext must be inside UserPrtovider}")
     }
     const{currentUser} = userContext;
-    console.log(currentUser)
+    console.log(currentUser);
+
+     const normalizePhone = (phone?: string) => {
+                if(!phone) return "";
+        let cleaned =  phone.replace(/\D/g, "");
+
+        // Here we convert Kenyan local contacts (07....) to the international format (254...);
+        if(cleaned.startsWith("0")) {
+            cleaned = "254" + cleaned.slice(1)
+        }
+        return cleaned;
+      }
+
+    const{contacts} = useContact();
+
+      const displayName  = React.useMemo(() => {
+        if(!user) return "";
+     const contactMap = new Map<string, string>();
+    contacts.forEach(contact => {
+      const phone = normalizePhone(contact.phoneNumbers[0]?.number || "");
+      const contactDisplayName = `${contact.givenName} ${contact.familyName || ""}`.trim();
+      if(phone) {
+        contactMap.set(phone, contactDisplayName)
+      };
+    });
+  
+        return (contactMap.get(normalizePhone(user.phone)) ??
+    user.name)
+    }, [contacts, user])
 
     const [messages, setMessages] = useState<Message[]>([]);
     useEffect(() => {
@@ -106,29 +136,63 @@ ws.current.onopen = () => {
 ws.current.onmessage = (event) => {
   try {
     const data = JSON.parse(event.data);
-    if(data.type === "join" || data.type === "status") return
-        const newMessage: Message = {
+    console.log("WS is incoming: ", data);
+    if(data.type === "join") return;
+    if (data.type === "status") {
+        console.log("Status received: ", data)
+        setMessages(prev => 
+            prev.map(msg =>
+                msg.id === data.messageId
+                ? {
+                    ...msg, 
+                    status: data.status,
+                }
+                : msg
+            )
+        );
+        return
+    }
+
+
+    if(data.senderId === user.id && data._id) {
+        console.log("Sending the delivered receipts: ", data._id);
+        ws.current?.send(
+            JSON.stringify({
+                type: "status",
+                messageId: data._id,
+                status: "delivered"
+            })
+        );
+    }
+     const newMessage: Message = {
             id: data._id ||  Date.now().toString(),
-            text: data.text, sender: data.senderId,    timeStamp: data.createdAt || new Date().toISOString(),  type: data.type,  file: data.file || null,
+            text: data.text,
+            sender: data.senderId,   
+            timeStamp: data.createdAt || new Date().toISOString(),
+            status: data.status,
+             type: data.type,  
+             file: data.file || null,
         };
-        setMessages((prev) => {
+       
+        setMessages(prev => {
             const tempIndex = prev.findIndex(
-                (msg) => msg.id === data.tempId
+                msg => msg.id === data.tempId
             );
+
             if(tempIndex !== -1) {
                 const updated = [...prev];
                 updated[tempIndex] = {
-
                 ...updated[tempIndex],
                 id: data._id,
-                status: "sent",
+                status: data.status,
                 timeStamp: data.createdAt
                 };
                   return updated;
             };
-            return [newMessage];
+            const exists  = prev.some(msg => msg.id === data._id);
+            if(exists) return prev;
+            return [newMessage, ...prev];
         });
-        return;
   } catch (err) {
     console.error("WebSocket message parse error:", err);
   }};
@@ -205,7 +269,8 @@ return (
         );
     };
       if(!user) {
-        return <ChatList search={search} currentUser={currentUser}/>  };
+        return( <ChatList search={search} currentUser={currentUser}/>);
+      };
     return(
 <SafeAreaView style={styles.container}>
 <KeyboardAvoidingView
@@ -233,7 +298,7 @@ keyboardVerticalOffset={90}
           )
       }
        </TouchableOpacity>
-        <Text style={styles.senderName}>{user.name}</Text>
+        <Text style={styles.senderName}>{displayName}</Text>
             </View>
      
         <View style={styles.rightHand}>
