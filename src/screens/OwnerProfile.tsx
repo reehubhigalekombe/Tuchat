@@ -13,8 +13,9 @@ const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 export default function OwnerProfile() {
     const navigation = useNavigation()
-    const[modalVisible, setModalVisible] = useState(false);
     const[loading, setLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [pickerVisible, setPickerVisible] = useState(false)
     const userContext = useContext(UserContext);
     if(!userContext){
         throw new Error("UserContext is not defined")
@@ -44,7 +45,7 @@ console.log("Uploading the User Avartar", currentUser.id);
 const response = await axios.post(`${BASE_URL}/media/upload/avatar`,
     formData, {
         headers: {
-            "Content-Type": "mulypart/formData"
+            "Content-Type": "multipart/form-data",
         },
     }
 );
@@ -87,26 +88,6 @@ if(!updatedUser?.avatar) {
 }
     };
 
-const showImagePickerOptions = () => {
-    Alert.alert(
-        "Change Profile Pic",
-        "Choose from Options",
-        [
-            {
-                text: "Take a Photo",
-                onPress: () => handleTakePhoto(),
-            },
-            {
-                text: "Choose from Gallery",
-                onPress: () => handleChangeAvatar(),
-            },
-            {
-                text: "Cancel",
-                style: "cancel"
-            }
-        ]
-    )
-}
 const handleChangeAvatar = async() => {
     const response = await launchImageLibrary({
         mediaType: "photo",
@@ -163,10 +144,10 @@ const handleChangeAvatar = async() => {
 
 <View style={styles.profPort}>
     <TouchableOpacity onPress={() => setModalVisible(true)} >
-        <Image source={{uri: currentUser?.avatar ||  "https://ui-avatars.com/api/?name=User"}} style={styles.avatar}  />
+        <Image source={{uri: currentUser?.avatar ||  "https://ui-avatars.com/api/?name=User",}} style={styles.avatar}  />
     </TouchableOpacity>
 
-<TouchableOpacity onPress={showImagePickerOptions} style={styles.edit}>
+<TouchableOpacity onPress={() => setPickerVisible(true)} style={styles.edit} activeOpacity={0.7}>
         <Icon  name="camera-outline" size={24} color="white" />
 </TouchableOpacity>
 </View>
@@ -177,27 +158,80 @@ const handleChangeAvatar = async() => {
     <Text style={{color: 'blue', fontSize: 16}}> Online</Text>
 </View>
 
-<Modal
- visible={modalVisible}
- transparent 
- animationType="fade"  >
- <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-       <View style={styles.modalPort}>
-<Image source={{uri: currentUser?.avatar ||  "https://ui-avatars.com/api/?name=User"
-    ||    "https://ui-avatars.com/api/?name=User",
-}} style={styles.modalImage} />
-<TouchableOpacity onPress={() => setModalVisible(false)}>
-       <Icon  name="close" size={24} color="white" />
-</TouchableOpacity>
-    </View>
- </TouchableWithoutFeedback>
+ <Modal
+            visible={modalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)} >
+            <TouchableWithoutFeedback
+                onPress={() => setModalVisible(false)}>
+                <View style={styles.modalPort}>
+                    <Image
+                        source={{uri:currentUser?.avatar ||"https://ui-avatars.com/api/?name=User" ,}} style={styles.modalImage} />
+                    <TouchableOpacity style={styles.closeButton}
+                        onPress={() => setModalVisible(false)} >
+                        <Icon name="close" size={30} color="black"  />
+                    </TouchableOpacity>
+                </View>
 
-</Modal >
+            </TouchableWithoutFeedback>
 
+        </Modal>
+        
+         <Modal
+            visible={pickerVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setPickerVisible(false)}>
+            <TouchableWithoutFeedback
+                onPress={() => setPickerVisible(false)}>
+
+                <View style={styles.pickerFloat}>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.pickerContainer}>
+                            <Text style={styles.pickerTitle}>Change Profile Photo </Text>
+
+                            <TouchableOpacity
+                                style={styles.pickOption}
+                                onPress={() => {
+                                    setPickerVisible(false);
+                                    handleTakePhoto();
+                                }}  >
+                                <Icon  name="camera-outline" size={24} color="#0A9DF1" />
+                                <Text style={styles.pickText}> Take a Photo </Text>
+
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.pickOption}
+                                onPress={() => {
+                                    setPickerVisible(false);
+                                    handleChangeAvatar();   }} >
+                                <Icon  name="images-outline"  size={24}  color="#0A9DF1" />
+                                <Text style={styles.pickText}>
+                                    Choose from the gallery
+                                </Text>
+
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.cancelOption}
+                                onPress={() =>
+                                    setPickerVisible(false)}  >
+
+                                <Text style={styles.cancelText}>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </View>
+            </TouchableWithoutFeedback>
+        </Modal>
 {
     loading && (
         <View style={styles.loading}>
-            <ActivityIndicator size="large" color="#0A9DF1" />
+            <ActivityIndicator size={40} color="#0A9DF1" />
             <Text>Updating the Profile Photo</Text>
         </View>
     )
@@ -225,24 +259,46 @@ avatar: {
 edit: {
     position: "absolute", right: 135, backgroundColor: "#666", borderRadius: 17, bottom: 10, padding: 5
 },
-modalPort: {
-justifyContent: "center", alignItems: 'center', flex: 1, backgroundColor: "rgba(0,0,0,0.95)"
+pickerFloat: {
+justifyContent: "flex-end", flex: 1, backgroundColor: "rgba(0,0,0,0.95)"
+},
+pickerContainer: {
+backgroundColor: "#ffffff", padding: 25, paddingBottom: 20, borderTopLeftRadius: 25, borderTopRightRadius: 25
+},
+pickerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#cc3a3a"
+
+},
+pickOption: {
+flexDirection: "row", alignItems: "center",  paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: "#eee"
+}, 
+pickText: {
+color: "#333", fontSize: 15, marginLeft: 15
+}, 
+cancelText: {
+fontSize: 15, fontWeight: "500", color: "#0A9DF1",
+},
+cancelOption: {
+paddingVertical: 14, marginTop: 14, alignItems: "center", backgroundColor: "#f2f2f2", borderRadius: 8
 },
 title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     flex: 1,
-}, closeBut:{
+},
+
+closeBut:{
     position: 'absolute', top: 40, right: 20, zIndex: 10
 },
 modalImage: {
     width: "100%",
     height: "100%",
-    resizeMode: "contain",
-    borderRadius: 10,
-    
-
+   
 },
 loading: {
     position: "absolute",
@@ -253,5 +309,15 @@ loading: {
     left: 0,
     right: 0,
 
+},
+modalPort: {
+flex:1 ,
+justifyContent: "center",
+alignItems: "center"
+},
+closeButton: {
+    zIndex: 10,
+    right: 20,
+    top: 40
 }
 })

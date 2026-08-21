@@ -29,7 +29,7 @@ export default function Prof() {
     };
 
     const uploadAvatar = async () => {
-        if(!avatar) return Alert.alert("Please select and image");
+        if(!avatar) return Alert.alert("Please select an image");
         try {
             setLoading(true);
             const formData = new FormData();

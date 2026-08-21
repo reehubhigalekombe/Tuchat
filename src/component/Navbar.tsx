@@ -224,10 +224,10 @@ icon: {
 }, 
 
 activeProfile: {
-  borderWidth: 2, borderColor:"rgba(10,157,241,1)"
+  borderWidth: 2, 
 }, 
 profAvatar: {
-  width: 40, height: 40, borderRadius: 20,
+  width: 46, height: 46, borderRadius: 23,
 },
 activeText: {
   color: "rgba(10,157,241,1)"
