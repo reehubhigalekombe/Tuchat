@@ -1,21 +1,91 @@
 import React, { useState, useContext } from"react";
 import { useNavigation } from "@react-navigation/native";
-import { TouchableWithoutFeedback } from "react-native";
-import { View, Image, ActivityIndicator,  Modal, TouchableOpacity, Text, ScrollView, StyleSheet, Alert} from "react-native";
+import { View, Image, ActivityIndicator,  Modal, TouchableOpacity, Text, ScrollView, StyleSheet, Alert,
+    TouchableWithoutFeedback
+} from "react-native";
 import Icon  from "react-native-vector-icons/Ionicons";
-import { launchImageLibrary, launchCamera } from "react-native-image-picker";
+import { launchImageLibrary, launchCamera, Asset} from "react-native-image-picker";
 import { UserContext } from "../context/UserContext";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const BASE_URL = "https://tuback-8pr0.onrender.com";
 
 export default function OwnerProfile() {
     const navigation = useNavigation()
     const[modalVisible, setModalVisible] = useState(false);
     const[loading, setLoading] = useState(false);
-    
     const userContext = useContext(UserContext);
     if(!userContext){
         throw new Error("UserContext is not defined")
     }
-    const {avatar, setAvatar}= useContext
+    const {currentUser, setCurrentUser} = userContext
+    const uploadAvatar = async (asset: Asset) => {
+        if(!asset.uri) {
+            Alert.alert("Error", "Sorry could not find the selected image")
+            return;
+        }
+if(!currentUser?.id) {
+    Alert.alert("Error", "Sorry user informationi s missing")
+    return;
+}
+
+try {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("avatar", {
+        uri: asset.uri,
+        type: asset.type || "image/jpeg",
+        name: asset.fileName || `avatar.${asset.type?.split("/")[1] || "jpg"}`,
+    } as any)
+
+formData.append("userId", currentUser.id);
+console.log("Uploading the User Avartar", currentUser.id);
+const response = await axios.post(`${BASE_URL}/media/upload/avatar`,
+    formData, {
+        headers: {
+            "Content-Type": "mulypart/formData"
+        },
+    }
+);
+console.log("Avatar response upload:", JSON.stringify(response.data, null, 2));
+const updatedUser = response.data.user;
+if(!updatedUser?.avatar) {
+    throw new Error("The avatar URL did not return from the server")
+}
+ setCurrentUser((prev) => {
+    if(!prev) return prev;
+
+    return {
+        ...prev, 
+        avatar: updatedUser.avatar,
+    };
+ });
+ const storedUser = await  AsyncStorage.getItem("currentUser");
+ if(storedUser) {
+    const parsedUser = JSON.parse(storedUser);
+    const updatedStoredUser = {
+        ...parsedUser, avatar: updatedUser.avatar,
+    };
+    await AsyncStorage.setItem("currentUser",
+         JSON.stringify(updatedStoredUser)
+    );
+ }
+ Alert.alert(" Success", "Your Profile photo uploaded.");
+
+}catch(error: any) {
+    console.log("Avatar upload failed");
+    if(error.response) {
+        console.log("Status:", error.response.status);
+                console.log("Data:", error.response.data);
+    } else {
+        console.log("Error", error.message)
+    }
+    Alert.alert("Error", "Failed to update your profile photo");
+} finally {
+    setLoading(false)
+}
+    };
 
 const showImagePickerOptions = () => {
     Alert.alert(
@@ -37,68 +107,48 @@ const showImagePickerOptions = () => {
         ]
     )
 }
-const handleChangeAvatar = () => {
-    launchImageLibrary(
-        {mediaType: "photo",
-            quality: 0.8,
-            maxWidth: 500,
-            maxHeight: 500, 
-            includeBase64: false
-        },
-        async (response) => {
-            if(response.didCancel) return;
-            if(response.errorMessage) {
-                Alert.alert("Error", response.errorMessage);
-                return
-            }
-            const uri = response.assets?.[0]?.uri;
-            if(!uri) return;
-            setLoading(true)
-            try{
-                await new Promise((resolve) => setTimeout(resolve, 2000));
-                setAvatar(uri)
-                Alert.alert("Profile Pic upload Successs")
+const handleChangeAvatar = async() => {
+    const response = await launchImageLibrary({
+        mediaType: "photo",
+        quality: 0.8,
+        maxWidth: 500,
+        maxHeight: 500, includeBase64: false
+    });
+    if(response.didCancel) {
+        return;
+    }
 
-            }catch(err) {
-                Alert.alert("Error", "Failed to upload the Profile Pic")
-            } finally{
-                setLoading(false)
-            }
-        }
-    )
-}
-    const handleTakePhoto = () => {
-        launchCamera(
-            {
-                mediaType: "photo",
-                quality: 0.8,
+    if(response.errorMessage) {
+        Alert.alert("Error", response.errorMessage);
+        return;
+    }
+
+    const asset = response.assets?.[0];
+    if(!asset) {
+        return
+    }
+    await uploadAvatar(asset);
+};
+    const handleTakePhoto = async () => {
+      const response = await launchCamera({
+            mediaType: "photo",
+            quality: 0.8,
             maxWidth: 500,
             maxHeight: 500, 
             includeBase64: false,
             cameraType: "front",
             saveToPhotos: true
-            },
-            async(response) => {
-                if(response.didCancel) return;
+            });
+             if(response.didCancel) return;
                 if(response.errorMessage) {
                     Alert.alert("Error", response.errorMessage);
                     return
                 }
-                const uri = response.assets?.[0].uri;
-                if(!uri) return;
-                setLoading(true)
-                try{
-                    await new Promise((resolve) => setTimeout(resolve, 2000));
-                    setAvatar(uri);
-                    Alert.alert("Woow, Profile pic updated Sucess")
-
-                }catch(err) {
-                    Alert.alert("Error", "Failed to take Pic");
-                } finally {
-                    setLoading(false)
+                const asset = response.assets?.[0];
+                if(!asset) {
+                    return
                 }
-            }
-        )
+                await uploadAvatar(asset)
     }
     return(
 
@@ -113,7 +163,7 @@ const handleChangeAvatar = () => {
 
 <View style={styles.profPort}>
     <TouchableOpacity onPress={() => setModalVisible(true)} >
-        <Image source={{uri: avatar}} style={styles.avatar}  />
+        <Image source={{uri: currentUser?.avatar ||  "https://ui-avatars.com/api/?name=User"}} style={styles.avatar}  />
     </TouchableOpacity>
 
 <TouchableOpacity onPress={showImagePickerOptions} style={styles.edit}>
@@ -123,14 +173,17 @@ const handleChangeAvatar = () => {
 
 
 <View style={styles.profData}>
-    <Text  style={{color: 'black', fontSize: 22}}>Higal Ekombe </Text>
+    <Text  style={{color: 'black', fontSize: 22}}>{currentUser?.name || "User"} </Text>
     <Text style={{color: 'blue', fontSize: 16}}> Online</Text>
 </View>
 
-<Modal visible={modalVisible} transparent animationType="fade"  >
+<Modal
+ visible={modalVisible}
+ transparent 
+ animationType="fade"  >
  <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
        <View style={styles.modalPort}>
-<Image source={{uri: avatar  
+<Image source={{uri: currentUser?.avatar ||  "https://ui-avatars.com/api/?name=User"
     ||    "https://ui-avatars.com/api/?name=User",
 }} style={styles.modalImage} />
 <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -144,7 +197,8 @@ const handleChangeAvatar = () => {
 {
     loading && (
         <View style={styles.loading}>
-            <ActivityIndicator size="large" color="green" />
+            <ActivityIndicator size="large" color="#0A9DF1" />
+            <Text>Updating the Profile Photo</Text>
         </View>
     )
 }

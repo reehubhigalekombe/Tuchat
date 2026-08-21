@@ -107,9 +107,9 @@ export default function ChatList({search, currentUser,}: Props) {
 };
 
 useEffect(() => {
-  if(!currentUser?.id || query.trim()) {
+  if(!currentUser?.id || !query.trim()) {
     setMessageResults([]);
-    return
+    return;
   }
   const timer = setTimeout(async () => {
     try {
@@ -296,7 +296,7 @@ useEffect(() => {
               <Image source={{uri:displayUser.avatar}}  style={styles.avatarImage} />
 
              ) : (
-              <Text>
+              <Text style={{color: "white"}}>
                 {displayUser.name 
                 ?.charAt(0)
                 .toUpperCase()
@@ -423,17 +423,17 @@ const styles = StyleSheet.create({
       flexDirection: "row", alignItems: "center", paddingHorizontal: 15, paddingVertical: 12
     },
     messageAvatar: {
-      width: 50, height: 50, borderRadius: 25, justifyContent: "center", alignItems: "center",
-      marginRight: 10, backgroundColor: "#ddd"
+      width: 60, height: 60, borderRadius: 30, justifyContent: "center", alignItems: "center",
+      marginRight: 10, backgroundColor: "#999"
     },
     avatarImage: {
-      width: 50, height: 50, borderRadius: 25,
+      width: 60, height: 60, borderRadius: 30,
     },
     messageUsername: {
-color: "#fff", fontSize: 15, fontWeight: 500
+color: "#000", fontSize: 15, fontWeight: 500
     },
     searchText: {
-      color: "#aaa", fontSize: 13, marginTop: 3
+      color: "#111", fontSize: 15, marginTop: 3
     }
 })
 
