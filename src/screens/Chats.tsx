@@ -152,18 +152,6 @@ ws.current.onmessage = (event) => {
         );
         return
     }
-
-
-    if(data.senderId === user.id && data._id) {
-        console.log("Sending the delivered receipts: ", data._id);
-        ws.current?.send(
-            JSON.stringify({
-                type: "status",
-                messageId: data._id,
-                status: "delivered"
-            })
-        );
-    }
      const newMessage: Message = {
             id: data._id ||  Date.now().toString(),
             text: data.text,
@@ -227,7 +215,9 @@ ws.current.onmessage = (event) => {
 
     useEffect(() => {
         console.log("Current user in context:", currentUser)
-    }, [currentUser])
+    }, [currentUser]);
+
+    
      const renderMessage = ({item}: {item: Message}) => {
         const isMe = item.sender === currentUser?.id;
         if (item.type === "image" || item.type === "video" || item.type === "file"|| item.type === "audio") {
